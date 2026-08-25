@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 告警 Mapper XML -->
+<mapper namespace="com.farm.smart.repository.AlarmMapper">
+
+    <!-- 结果映射 -->
+    <resultMap id="AlarmResultMap" type="com.farm.smart.model.entity.Alarm">
+        <id property="id" column="id"/>
+        <result property="farmId" column="farm_id"/>
+        <result property="fieldId" column="field_id"/>
+        <result property="sensorId" column="sensor_id"/>
+        <result property="level" column="level" javaType="com.farm.smart.model.enums.AlarmLevel"/>
+        <result property="type" column="type"/>
+        <result property="title" column="title"/>
+        <result property="content" column="content"/>
+        <result property="handleStatus" column="handle_status"/>
+        <result property="handler" column="handler"/>
+        <result property="handleTime" column="handle_time"/>
+        <result property="handleRemark" column="handle_remark"/>
+        <result property="alarmTime" column="alarm_time"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <!-- 查询今日告警数量 -->
+    <select id="countToday" resultType="int">
+        SELECT COUNT(*) FROM alarm
+        WHERE farm_id = #{farmId}
+          AND alarm_time BETWEEN #{startTime} AND #{endTime}
+    </select>
+
+    <!-- 查询最近告警列表 -->
+    <select id="selectRecent" resultMap="AlarmResultMap">
+        SELECT * FROM alarm
+        WHERE farm_id = #{farmId}
+        ORDER BY alarm_time DESC
+        LIMIT #{limit}
+    </select>
+
+    <!-- 告警级别统计 -->
+    <select id="countByLevel" resultType="java.util.Map">
+        SELECT level, COUNT(*) AS count
+        FROM alarm
+        WHERE farm_id = #{farmId}
+          AND alarm_time BETWEEN #{startTime} AND #{endTime}
+        GROUP BY level
+    </select>
+
+    <!-- 更新告警处理状态 -->
+    <update id="updateHandleStatus">
+        UPDATE alarm
+        SET handle_status = 1,
+            handler = #{handler},
+            handle_remark = #{remark},
+            handle_time = #{handleTime}
+        WHERE id = #{id}
+    </update>
+
+</mapper>

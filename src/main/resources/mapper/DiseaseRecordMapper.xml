@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 病害识别记录 Mapper XML -->
+<mapper namespace="com.farm.smart.repository.DiseaseRecordMapper">
+
+    <!-- 查询今日病害识别次数 -->
+    <select id="countToday" resultType="int">
+        SELECT COUNT(*) FROM disease_record
+        WHERE farm_id = #{farmId}
+          AND detect_time BETWEEN #{startTime} AND #{endTime}
+    </select>
+
+    <!-- 查询病害识别历史 -->
+    <select id="selectHistory" resultType="com.farm.smart.model.entity.DiseaseRecord">
+        SELECT * FROM disease_record
+        WHERE farm_id = #{farmId}
+          <if test="fieldId != null">
+            AND field_id = #{fieldId}
+          </if>
+          AND detect_time BETWEEN #{startTime} AND #{endTime}
+        ORDER BY detect_time DESC
+        LIMIT 100
+    </select>
+
+</mapper>

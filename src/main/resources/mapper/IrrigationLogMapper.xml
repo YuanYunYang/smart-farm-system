@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 灌溉记录 Mapper XML -->
+<mapper namespace="com.farm.smart.repository.IrrigationLogMapper">
+
+    <!-- 结果映射 -->
+    <resultMap id="IrrigationLogResultMap" type="com.farm.smart.model.entity.IrrigationLog">
+        <id property="id" column="id"/>
+        <result property="ruleId" column="rule_id"/>
+        <result property="farmId" column="farm_id"/>
+        <result property="fieldId" column="field_id"/>
+        <result property="valveDeviceId" column="valve_device_id"/>
+        <result property="triggerType" column="trigger_type"/>
+        <result property="status" column="status" javaType="com.farm.smart.model.enums.IrrigationStatus"/>
+        <result property="plannedDuration" column="planned_duration"/>
+        <result property="actualDuration" column="actual_duration"/>
+        <result property="triggerSoilMoisture" column="trigger_soil_moisture"/>
+        <result property="waterUsage" column="water_usage"/>
+        <result property="commandId" column="command_id"/>
+        <result property="startTime" column="start_time"/>
+        <result property="endTime" column="end_time"/>
+        <result property="resultMessage" column="result_message"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <!-- 查询某地块当天灌溉次数 -->
+    <select id="countTodayByFieldId" resultType="int">
+        SELECT COUNT(*) FROM irrigation_log
+        WHERE field_id = #{fieldId}
+          AND create_time BETWEEN #{startTime} AND #{endTime}
+          AND status != 4
+    </select>
+
+    <!-- 查询本周灌溉统计 -->
+    <select id="weeklyStats" resultType="java.util.Map">
+        SELECT
+            COUNT(*) AS count,
+            COALESCE(SUM(water_usage), 0) AS totalWater
+        FROM irrigation_log
+        WHERE farm_id = #{farmId}
+          AND create_time BETWEEN #{startTime} AND #{endTime}
+          AND status = 2
+    </select>
+
+    <!-- 查询正在进行的灌溉 (防止重复触发) -->
+    <select id="selectRunningByFieldId" resultMap="IrrigationLogResultMap">
+        SELECT * FROM irrigation_log
+        WHERE field_id = #{fieldId}
+          AND status IN (0, 1)
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 根据指令ID查询灌溉记录 -->
+    <select id="selectByCommandId" resultMap="IrrigationLogResultMap">
+        SELECT * FROM irrigation_log
+        WHERE command_id = #{commandId}
+    </select>
+
+    <!-- 查询本周灌溉日志列表 -->
+    <select id="selectWeeklyLogs" resultMap="IrrigationLogResultMap">
+        SELECT * FROM irrigation_log
+        WHERE farm_id = #{farmId}
+          AND create_time BETWEEN #{startTime} AND #{endTime}
+        ORDER BY create_time DESC
+    </select>
+
+</mapper>

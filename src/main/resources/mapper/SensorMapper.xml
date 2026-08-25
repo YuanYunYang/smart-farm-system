@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 传感器 Mapper XML -->
+<mapper namespace="com.farm.smart.repository.SensorMapper">
+
+    <!-- 结果映射 (type 枚举需指定 typeHandler, 此处用字符串存储) -->
+    <resultMap id="SensorResultMap" type="com.farm.smart.model.entity.Sensor">
+        <id property="id" column="id"/>
+        <result property="farmId" column="farm_id"/>
+        <result property="fieldId" column="field_id"/>
+        <result property="sensorCode" column="sensor_code"/>
+        <result property="name" column="name"/>
+        <result property="type" column="type" javaType="com.farm.smart.model.enums.SensorType"/>
+        <result property="model" column="model"/>
+        <result property="intervalSeconds" column="interval_seconds"/>
+        <result property="thresholdMax" column="threshold_max"/>
+        <result property="thresholdMin" column="threshold_min"/>
+        <result property="onlineStatus" column="online_status"/>
+        <result property="lastHeartbeat" column="last_heartbeat"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <!-- 根据农场ID查询传感器列表 -->
+    <select id="selectByFarmId" resultMap="SensorResultMap">
+        SELECT * FROM sensor
+        WHERE farm_id = #{farmId}
+        ORDER BY field_id, id
+    </select>
+
+    <!-- 更新传感器在线状态 -->
+    <update id="updateOnlineStatus">
+        UPDATE sensor
+        SET online_status = #{status},
+            last_heartbeat = NOW(),
+            update_time = NOW()
+        WHERE id = #{id}
+    </update>
+
+</mapper>

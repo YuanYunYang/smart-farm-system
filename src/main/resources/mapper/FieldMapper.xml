@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 地块 Mapper XML -->
+<mapper namespace="com.farm.smart.repository.FieldMapper">
+
+    <!-- 根据农场ID查询地块列表 -->
+    <select id="selectByFarmId" resultType="com.farm.smart.model.entity.Field">
+        SELECT * FROM field
+        WHERE farm_id = #{farmId}
+        ORDER BY id
+    </select>
+
+</mapper>

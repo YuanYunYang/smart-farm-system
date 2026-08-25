@@ -1,0 +1,115 @@
+# ============================================================
+# 智能农场监测系统 - 配置文件
+# ============================================================
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
+spring:
+  application:
+    name: smart-farm-system
+
+  # ---------------- MySQL 数据源 ----------------
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/smart_farm?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: root
+    password: Farm@2024
+
+  # ---------------- Redis ----------------
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: Farm@2024
+      database: 0
+      timeout: 5000ms
+      lettuce:
+        pool:
+          max-active: 16
+          max-idle: 8
+          min-idle: 2
+          max-wait: 3000ms
+
+  # ---------------- Jackson 序列化 ----------------
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Asia/Shanghai
+    default-property-inclusion: non_null
+
+  # ---------------- 文件上传限制 ----------------
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 50MB
+
+# ==================== MyBatis-Plus ====================
+mybatis-plus:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.farm.smart.model.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    # MyBatis-Plus 枚举类型处理器: 使用 @EnumValue 标记的字段进行数据库持久化
+    default-enum-type-handler: com.baomidou.mybatisplus.core.handlers.MybatisEnumTypeHandler
+  global-config:
+    db-config:
+      id-type: auto
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+# ==================== MQTT 配置 ====================
+mqtt:
+  broker-url: tcp://localhost:1883
+  client-id: smart-farm-server-${random.uuid}
+  username: ""
+  password: ""
+  keep-alive-interval: 60
+  connection-timeout: 30
+  default-qos: 1
+  topics:
+    - farm/+/sensor/+/data        # 传感器数据上报
+    - farm/+/control/resp          # 设备控制回复
+    - farm/+/device/status         # 设备心跳/状态
+
+# ==================== InfluxDB 配置 ====================
+influxdb:
+  url: http://localhost:8086
+  token: farm-super-token-for-influxdb-access
+  org: smart-farm
+  bucket: sensor_data
+
+# ==================== AI 病虫害识别服务 ====================
+ai:
+  disease:
+    # 识别服务地址 (本地 YOLOv8 HTTP API 或云端 API)
+    base-url: http://localhost:8501
+    # 接口路径
+    detect-path: /api/v1/detect
+    # 默认来源: local / cloud
+    default-source: local
+    # 模型版本
+    model-version: yolov8n-agri-disease-v1
+    # 请求超时 (毫秒)
+    timeout: 30000
+    # 是否启用 (未启用时返回模拟结果, 方便开发测试)
+    enabled: false
+
+# ==================== 灌溉调度 ====================
+irrigation:
+  schedule:
+    # 检查间隔 (cron), 默认每5分钟
+    cron: "0 */5 * * * ?"
+    # 数据聚合间隔 (每小时)
+    aggregation-cron: "0 0 * * * ?"
+
+# ==================== 日志 ====================
+logging:
+  level:
+    root: INFO
+    com.farm.smart: DEBUG
+    org.eclipse.paho: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"

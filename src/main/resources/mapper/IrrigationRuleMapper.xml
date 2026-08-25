@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 灌溉规则 Mapper XML -->
+<mapper namespace="com.farm.smart.repository.IrrigationRuleMapper">
+
+    <!-- 结果映射 -->
+    <resultMap id="IrrigationRuleResultMap" type="com.farm.smart.model.entity.IrrigationRule">
+        <id property="id" column="id"/>
+        <result property="farmId" column="farm_id"/>
+        <result property="fieldId" column="field_id"/>
+        <result property="name" column="name"/>
+        <result property="soilMoistureThreshold" column="soil_moisture_threshold"/>
+        <result property="targetSoilMoisture" column="target_soil_moisture"/>
+        <result property="allowedStart" column="allowed_start"/>
+        <result property="allowedEnd" column="allowed_end"/>
+        <result property="maxDurationSeconds" column="max_duration_seconds"/>
+        <result property="maxDailyCount" column="max_daily_count"/>
+        <result property="skipIfRain" column="skip_if_rain"/>
+        <result property="enabled" column="enabled"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <!-- 查询所有启用的灌溉规则 -->
+    <select id="selectEnabledRules" resultMap="IrrigationRuleResultMap">
+        SELECT * FROM irrigation_rule
+        WHERE enabled = 1
+        ORDER BY farm_id, field_id
+    </select>
+
+    <!-- 根据农场ID查询灌溉规则 -->
+    <select id="selectByFarmId" resultMap="IrrigationRuleResultMap">
+        SELECT * FROM irrigation_rule
+        WHERE farm_id = #{farmId}
+        ORDER BY id
+    </select>
+
+    <!-- 根据地块ID查询灌溉规则 -->
+    <select id="selectByFieldId" resultMap="IrrigationRuleResultMap">
+        SELECT * FROM irrigation_rule
+        WHERE field_id = #{fieldId}
+          AND enabled = 1
+        LIMIT 1
+    </select>
+
+</mapper>

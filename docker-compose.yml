@@ -1,0 +1,89 @@
+# ============================================================
+# 智能农场监测系统 - 基础设施 Docker Compose
+# 包含: MySQL 8.0 + Redis 7 + EMQX 5.0 (MQTT Broker) + InfluxDB 2.0
+# 使用方式: docker-compose up -d
+# ============================================================
+version: '3.8'
+
+services:
+  # ---------------- MySQL 8.0 业务数据库 ----------------
+  mysql:
+    image: mysql:8.0
+    container_name: farm-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: Farm@2024
+      MYSQL_DATABASE: smart_farm
+      MYSQL_CHARSET: utf8mb4
+      MYSQL_COLLATION: utf8mb4_unicode_ci
+      TZ: Asia/Shanghai
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./src/main/resources/sql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    networks:
+      - farm-network
+
+  # ---------------- Redis 7 缓存 ----------------
+  redis:
+    image: redis:7-alpine
+    container_name: farm-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --requirepass Farm@2024 --appendonly yes
+    networks:
+      - farm-network
+
+  # ---------------- EMQX 5.0 MQTT Broker ----------------
+  emqx:
+    image: emqx/emqx:5.4
+    container_name: farm-emqx
+    restart: unless-stopped
+    environment:
+      EMQX_NAME: farm-emqx
+      EMQX_HOST: 127.0.0.1
+      EMQX_DASHBOARD__DEFAULT_PASSWORD: "Farm@2024"
+    ports:
+      - "1883:1883"     # MQTT TCP 端口
+      - "8083:8083"     # MQTT WebSocket
+      - "8084:8084"     # MQTT WebSocket over TLS
+      - "8883:8883"     # MQTT over TLS
+      - "18083:18083"   # EMQX Dashboard
+    volumes:
+      - emqx_data:/opt/emqx/data
+    networks:
+      - farm-network
+
+  # ---------------- InfluxDB 2.0 时序数据库 ----------------
+  influxdb:
+    image: influxdb:2.7
+    container_name: farm-influxdb
+    restart: unless-stopped
+    environment:
+      DOCKER_INFLUXDB_INIT_MODE: setup
+      DOCKER_INFLUXDB_INIT_USERNAME: admin
+      DOCKER_INFLUXDB_INIT_PASSWORD: Farm@2024
+      DOCKER_INFLUXDB_INIT_ORG: smart-farm
+      DOCKER_INFLUXDB_INIT_BUCKET: sensor_data
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: farm-super-token-for-influxdb-access
+    ports:
+      - "8086:8086"
+    volumes:
+      - influxdb_data:/var/lib/influxdb2
+    networks:
+      - farm-network
+
+volumes:
+  mysql_data:
+  redis_data:
+  emqx_data:
+  influxdb_data:
+
+networks:
+  farm-network:
+    driver: bridge
