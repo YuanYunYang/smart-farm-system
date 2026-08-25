@@ -194,3 +194,27 @@ INSERT INTO `alarm` (`farm_id`, `field_id`, `sensor_id`, `level`, `type`, `title
 (1, 1, 1, 2, 'SENSOR_THRESHOLD_MAX', '温度超上限告警', 'A区1号温度传感器 当前值 36.5 超过上限阈值 35.0', 1, '2024-05-20 13:00:00'),
 (1, 1, 3, 3, 'SENSOR_THRESHOLD_MIN', '土壤湿度低于下限告警', 'A区1号土壤湿度 当前值 18.0 低于下限阈值 20.0', 0, '2024-05-20 14:00:00'),
 (1, 3, 7, 4, 'DEVICE_OFFLINE', '设备离线告警', '传感器 ESP32-B01-TEMP 已超过10分钟未上报数据, 疑似离线', 0, '2024-05-20 15:30:00');
+
+-- ============================================================
+-- 用户与权限管理
+-- ============================================================
+
+-- ---------------- 系统用户表 ----------------
+DROP TABLE IF EXISTS `sys_user`;
+CREATE TABLE `sys_user` (
+    `id`          BIGINT       NOT NULL AUTO_INCREMENT COMMENT '用户ID',
+    `username`    VARCHAR(50)  NOT NULL COMMENT '用户名(登录账号, 唯一)',
+    `password`    VARCHAR(100) NOT NULL COMMENT '密码(BCrypt加密存储)',
+    `role`        VARCHAR(20)  NOT NULL COMMENT '角色: SUPER_ADMIN-超级管理员, SYSTEM_ADMIN-系统管理员, USER-普通用户',
+    `status`      INT          NOT NULL DEFAULT 1 COMMENT '状态: 0-禁用, 1-启用',
+    `create_time` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted`     INT          NOT NULL DEFAULT 0 COMMENT '逻辑删除: 0-未删除, 1-已删除',
+    PRIMARY KEY (`id`),
+    UNIQUE INDEX `uk_username` (`username`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='系统用户表';
+
+-- 默认超级管理员账号
+-- 用户名: admin  密码: admin123 (BCrypt 加密, 已用 Hutool BCrypt.checkpw 验证通过)
+INSERT INTO `sys_user` (`username`, `password`, `role`, `status`) VALUES
+('admin', '$2a$10$a5Oc8buhYo.SrIWc/Vy/7u7cjZg7y4Peg2HC7puU9GMfPEhBVvejW', 'SUPER_ADMIN', 1);

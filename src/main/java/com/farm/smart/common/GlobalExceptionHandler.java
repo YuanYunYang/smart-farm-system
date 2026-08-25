@@ -37,6 +37,15 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * 业务异常 (携带 ResultCode, 用于权限/用户管理等业务校验)
+     */
+    @ExceptionHandler(BusinessException.class)
+    public Result<Void> handleBusinessException(BusinessException e) {
+        log.warn("业务异常: code={}, msg={}", e.getResultCode().getCode(), e.getResponseMessage());
+        return Result.error(e.getResultCode(), e.getResponseMessage());
+    }
+
+    /**
      * 运行时异常
      */
     @ExceptionHandler(RuntimeException.class)

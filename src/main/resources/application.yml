@@ -105,6 +105,12 @@ irrigation:
     # 数据聚合间隔 (每小时)
     aggregation-cron: "0 0 * * * ?"
 
+# ==================== JWT 认证配置 ====================
+jwt:
+  secret: smartFarmJwtSecretKey2026VeryLongSecretString
+  # token 有效期 (毫秒), 默认 24 小时
+  expiration: 86400000
+
 # ==================== 日志 ====================
 logging:
   level:

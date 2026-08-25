@@ -28,6 +28,14 @@ public enum ResultCode {
     SENSOR_NOT_FOUND(1003, "传感器不存在"),
     SENSOR_OFFLINE(1004, "传感器已离线"),
 
+    /* 用户与权限相关 (1005-1099) */
+    USER_NOT_FOUND(1005, "用户不存在"),
+    USERNAME_EXISTS(1006, "用户名已存在"),
+    USERNAME_OR_PASSWORD_ERROR(1007, "用户名或密码错误"),
+    USER_DISABLED(1008, "账号已被禁用"),
+    CANNOT_DELETE_SELF(1009, "不能删除自己"),
+    CANNOT_OPERATE_HIGHER_ROLE(1010, "不能操作同级或更高级用户"),
+
     /* 灌溉相关 (2000-2099) */
     IRRIGATION_RULE_NOT_FOUND(2001, "灌溉规则不存在"),
     IRRIGATION_TIME_LIMIT(2002, "当前时间不在允许灌溉时段"),
