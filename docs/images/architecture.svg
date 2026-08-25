@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 720 640" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="arr-n2" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" markerUnits="userSpaceOnUse" orient="auto">
+      <path d="M1 1 L7 4 L1 7 Z" fill="#52525B"/>
+    </marker>
+    <marker id="arr-b2" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" markerUnits="userSpaceOnUse" orient="auto">
+      <path d="M1 1 L7 4 L1 7 Z" fill="#4B3FE3"/>
+    </marker>
+    <marker id="arr-a2" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" markerUnits="userSpaceOnUse" orient="auto">
+      <path d="M1 1 L7 4 L1 7 Z" fill="#27D2BF"/>
+    </marker>
+    <style>
+      .t { fill: #171717; font: 400 14px/20px "SF Pro Text","PingFang SC","Noto Sans CJK SC","WenQuanYi Micro Hei",system-ui,sans-serif; }
+      .th { fill: #171717; font: 500 16px/24px "SF Pro Text","PingFang SC","Noto Sans CJK SC","WenQuanYi Micro Hei",system-ui,sans-serif; }
+      .ts { fill: #52525B; font: 400 12px/18px "SF Pro Text","PingFang SC","Noto Sans CJK SC","WenQuanYi Micro Hei",system-ui,sans-serif; }
+      .tc { fill: #171717; font: 500 13px/20px "JetBrains Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace; }
+      .arr { stroke: #52525B; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+      .arr-brand { stroke: #4B3FE3; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; fill: none; stroke-dasharray: 5 4; }
+      .arr-accent { stroke: #27D2BF; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+      .boundary-fill { fill: #EFEFF2; }
+      .boundary-stroke { stroke: rgba(23,23,23,0.12); stroke-width: 1; stroke-dasharray: 6 4; fill: none; }
+      .node-n { fill: #F7F7F8; stroke: rgba(23,23,23,0.12); stroke-width: 1; }
+      .node-b { fill: #F2F7FF; stroke: #4B3FE3; stroke-width: 1.5; }
+      .node-a { fill: #EAFBF8; stroke: #27D2BF; stroke-width: 1.5; }
+      .node-e { fill: #F7F7F8; stroke: #52525B; stroke-width: 1; }
+      .lbl-bg { fill: #F7F7F8; }
+      .lbl-bg-brand { fill: #F2F7FF; }
+      .brand-text { fill: #1A1759; }
+      .brand-label { fill: #4B3FE3; }
+      .accent-text { fill: #0F766E; }
+      .accent-label { fill: #27D2BF; }
+    </style>
+  </defs>
+
+  <!-- Title -->
+  <text x="360" y="22" text-anchor="middle" class="th">AI + IoT 智能农场监测系统 — 架构总览</text>
+
+  <!-- Cloud Platform boundary -->
+  <rect class="boundary-fill boundary-stroke" x="30" y="40" width="660" height="300" rx="12"/>
+  <text x="50" y="62" class="ts" style="font-weight:500">云端平台 (Spring Boot)</text>
+
+  <!-- Row 1: App tier -->
+  <!-- 接入层 -->
+  <rect class="node-n" x="70" y="78" width="180" height="56" rx="8"/>
+  <text x="160" y="102" text-anchor="middle" class="th">接入层</text>
+  <text x="160" y="120" text-anchor="middle" class="ts">REST API + WebSocket</text>
+
+  <!-- 灌溉规则引擎 (brand focal) -->
+  <rect class="node-b" x="275" y="78" width="170" height="56" rx="8"/>
+  <text x="360" y="102" text-anchor="middle" class="th brand-text">灌溉规则引擎</text>
+  <text x="360" y="120" text-anchor="middle" class="ts brand-label">定时触发 + 安全限制</text>
+
+  <!-- AI 病虫害识别 (accent) -->
+  <rect class="node-a" x="475" y="78" width="165" height="56" rx="8"/>
+  <text x="557" y="102" text-anchor="middle" class="th accent-text">AI 病虫害识别</text>
+  <text x="557" y="120" text-anchor="middle" class="ts accent-label">YOLOv8 模型服务</text>
+
+  <!-- Row 2: Service 层 -->
+  <rect class="node-n" x="230" y="168" width="260" height="56" rx="8"/>
+  <text x="360" y="192" text-anchor="middle" class="tc">Service 层</text>
+  <text x="360" y="210" text-anchor="middle" class="ts">业务逻辑 + 告警系统</text>
+
+  <!-- Row 3: Data tier -->
+  <!-- 数据层 -->
+  <rect class="node-n" x="70" y="256" width="280" height="56" rx="8"/>
+  <text x="210" y="280" text-anchor="middle" class="tc">数据层</text>
+  <text x="210" y="298" text-anchor="middle" class="ts">MySQL · InfluxDB · Redis</text>
+
+  <!-- MQTT Client -->
+  <rect class="node-n" x="395" y="256" width="180" height="56" rx="8"/>
+  <text x="485" y="280" text-anchor="middle" class="tc">MQTT Client</text>
+  <text x="485" y="298" text-anchor="middle" class="ts">Eclipse Paho</text>
+
+  <!-- EMQX Broker (external) -->
+  <rect class="node-e" x="250" y="372" width="220" height="50" rx="25"/>
+  <text x="360" y="392" text-anchor="middle" class="th">EMQX Broker</text>
+  <text x="360" y="408" text-anchor="middle" class="ts">MQTT 消息中间件</text>
+
+  <!-- 树莓派 (external) -->
+  <rect class="node-e" x="210" y="460" width="300" height="56" rx="12"/>
+  <text x="360" y="482" text-anchor="middle" class="th">树莓派 (边缘网关)</text>
+  <text x="360" y="500" text-anchor="middle" class="ts">数据聚合 · MQTT 上云 · GPIO 控制</text>
+
+  <!-- ESP32 节点A (external) -->
+  <rect class="node-e" x="50" y="560" width="180" height="56" rx="12"/>
+  <text x="140" y="582" text-anchor="middle" class="th">ESP32 节点 A</text>
+  <text x="140" y="600" text-anchor="middle" class="ts">DHT22 · FC-28</text>
+
+  <!-- ESP32 节点B (external) -->
+  <rect class="node-e" x="255" y="560" width="180" height="56" rx="12"/>
+  <text x="345" y="582" text-anchor="middle" class="th">ESP32 节点 B</text>
+  <text x="345" y="600" text-anchor="middle" class="ts">BH1750 · MH-Z19B</text>
+
+  <!-- 继电器 + 水阀 (external) -->
+  <rect class="node-e" x="465" y="560" width="200" height="56" rx="12"/>
+  <text x="565" y="582" text-anchor="middle" class="th">继电器 + 电磁水阀</text>
+  <text x="565" y="600" text-anchor="middle" class="ts">灌溉执行器</text>
+
+  <!-- Connectors -->
+  <!-- 1. 接入层 → Service -->
+  <path class="arr" d="M 160 134 L 160 152 Q 160 168, 176 168 L 280 168" marker-end="url(#arr-n2)"/>
+
+  <!-- 2. 灌溉引擎 → Service (brand path) -->
+  <path class="arr-brand" d="M 360 134 L 360 168" marker-end="url(#arr-b2)"/>
+
+  <!-- 3. AI识别 → Service -->
+  <path class="arr" d="M 557 134 C 557 152, 440 160, 440 168" marker-end="url(#arr-n2)"/>
+
+  <!-- 4. Service → 数据层 -->
+  <path class="arr" d="M 300 224 L 300 256" marker-end="url(#arr-n2)"/>
+  <rect class="lbl-bg" x="282" y="232" width="36" height="16" rx="4"/>
+  <text x="300" y="244" text-anchor="middle" class="ts">读写</text>
+
+  <!-- 5. Service → MQTT Client (brand primary path) -->
+  <path class="arr-brand" d="M 420 224 L 420 256" marker-end="url(#arr-b2)"/>
+
+  <!-- 6. MQTT Client → EMQX -->
+  <path class="arr-brand" d="M 485 312 C 485 340, 420 350, 400 372" marker-end="url(#arr-b2)"/>
+  <rect class="lbl-bg-brand" x="392" y="332" width="36" height="16" rx="4"/>
+  <text x="410" y="344" text-anchor="middle" class="ts brand-label">MQTT</text>
+
+  <!-- 7. EMQX → 树莓派 (bidirectional MQTT) -->
+  <path class="arr" d="M 360 422 L 360 460" marker-end="url(#arr-n2)"/>
+  <path class="arr" d="M 380 460 L 380 422" marker-end="url(#arr-n2)"/>
+  <rect class="lbl-bg" x="390" y="430" width="40" height="16" rx="4"/>
+  <text x="410" y="442" text-anchor="middle" class="ts">MQTT</text>
+
+  <!-- 8. 树莓派 → ESP32节点A (WiFi/I2C) -->
+  <path class="arr" d="M 290 516 C 250 540, 180 548, 140 560" marker-end="url(#arr-n2)"/>
+  <rect class="lbl-bg" x="180" y="530" width="40" height="16" rx="4"/>
+  <text x="200" y="542" text-anchor="middle" class="ts">WiFi</text>
+
+  <!-- 9. 树莓派 → ESP32节点B (WiFi/I2C) -->
+  <path class="arr" d="M 360 516 L 345 560" marker-end="url(#arr-n2)"/>
+
+  <!-- 10. 树莓派 → 继电器 (GPIO 控制, accent = control loop) -->
+  <path class="arr-accent" d="M 430 516 C 470 540, 530 548, 565 560" marker-end="url(#arr-a2)"/>
+  <rect class="lbl-bg" x="472" y="530" width="50" height="16" rx="4"/>
+  <text x="497" y="542" text-anchor="middle" class="ts accent-label">GPIO</text>
+
+</svg>
