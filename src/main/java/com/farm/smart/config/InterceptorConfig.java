@@ -31,11 +31,14 @@ public class InterceptorConfig implements WebMvcConfigurer {
                 .addPathPatterns("/**")
                 .excludePathPatterns(
                         "/auth/**",
+                        "/api/mqtt/**",
                         "/doc.html",
                         "/swagger-ui/**",
                         "/v3/api-docs/**",
                         "/webjars/**",
                         "/ws/**",
+                        // Actuator 监控端点
+                        "/actuator/**",
                         // 静态资源/错误页
                         "/error",
                         "/favicon.ico"

@@ -53,6 +53,11 @@ public enum ResultCode {
     ALARM_THRESHOLD_EXCEEDED(4001, "传感器数值超阈值"),
     ALARM_DEVICE_OFFLINE(4002, "设备离线"),
 
+    /* 限流与租户 (4300-4399) */
+    RATE_LIMITED(429, "请求过于频繁，请稍后重试"),
+    TENANT_DISABLED(1011, "租户不存在或已禁用"),
+    SENSOR_LIMIT_EXCEEDED(1012, "传感器数量已超出当前套餐限制"),
+
     /* 系统错误 (500) */
     INTERNAL_ERROR(500, "系统内部错误"),
     MQTT_CONNECT_FAILED(5001, "MQTT连接失败"),

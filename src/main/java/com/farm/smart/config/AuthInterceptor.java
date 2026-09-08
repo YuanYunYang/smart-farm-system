@@ -3,6 +3,7 @@ package com.farm.smart.config;
 import com.farm.smart.common.JwtUtils;
 import com.farm.smart.common.Result;
 import com.farm.smart.common.ResultCode;
+import com.farm.smart.tenant.TenantContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -50,6 +51,7 @@ public class AuthInterceptor implements HandlerInterceptor {
         // 2. 解析 token
         String username = JwtUtils.getUsernameFromToken(token);
         String role = JwtUtils.getRoleFromToken(token);
+        Long tenantId = JwtUtils.getTenantIdFromToken(token);
         if (username == null || role == null || JwtUtils.isTokenExpired(token)) {
             return writeUnauthorized(response, "token 无效或已过期");
         }
@@ -57,8 +59,23 @@ public class AuthInterceptor implements HandlerInterceptor {
         // 3. 存入 request attribute, 供后续使用
         request.setAttribute(CURRENT_USERNAME, username);
         request.setAttribute(CURRENT_ROLE, role);
-        log.debug("认证通过: username={}, role={}", username, role);
+        // 4. 注入租户上下文（MyBatis-Plus 自动追加 tenant_id 条件）
+        if (tenantId != null) {
+            TenantContext.setTenantId(tenantId);
+        }
+        // 超管可跨租户操作
+        if ("SUPER_ADMIN".equals(role)) {
+            TenantContext.setIgnore(true);
+        }
+        log.debug("认证通过: username={}, role={}, tenantId={}", username, role, tenantId);
         return true;
+    }
+
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response,
+                                Object handler, Exception ex) {
+        // 清除租户上下文，防止线程池内存泄漏
+        TenantContext.clear();
     }
 
     /**

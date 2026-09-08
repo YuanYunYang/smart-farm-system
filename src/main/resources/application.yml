@@ -1,57 +1,112 @@
 # ============================================================
-# 智能农场监测系统 - 配置文件
+# 智能农场监测系统 - SaaS 化配置
 # ============================================================
 server:
-  port: 8080
+  port: ${SERVER_PORT:8080}
   servlet:
     context-path: /
+  # 生产级 Tomcat 调优
+  tomcat:
+    threads:
+      max: 400
+      min-spare: 20
+    max-connections: 8192
+    accept-count: 200
+    connection-timeout: 10000
 
 spring:
   application:
     name: smart-farm-system
 
-  # ---------------- MySQL 数据源 ----------------
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/smart_farm?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
-    username: root
-    password: Farm@2024
+  # ===================== 激活配置文件 =====================
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
 
-  # ---------------- Redis ----------------
-  data:
-    redis:
-      host: localhost
-      port: 6379
-      password: Farm@2024
-      database: 0
-      timeout: 5000ms
-      lettuce:
-        pool:
-          max-active: 16
-          max-idle: 8
-          min-idle: 2
-          max-wait: 3000ms
-
-  # ---------------- Jackson 序列化 ----------------
+  # ===================== Jackson 序列化 =====================
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: Asia/Shanghai
     default-property-inclusion: non_null
 
-  # ---------------- 文件上传限制 ----------------
+  # ===================== 读写分离动态数据源 =====================
+  datasource:
+    dynamic:
+      primary: master
+      strict: false
+      datasource:
+        # 主库（写）
+        master:
+          url: jdbc:mysql://${DB_HOST:localhost}:3306/smart_farm?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&rewriteBatchedStatements=true
+          username: ${DB_USER:root}
+          password: ${DB_PASSWORD:Farm@2024}
+          driver-class-name: com.mysql.cj.jdbc.Driver
+        # 从库（读）
+        slave:
+          url: jdbc:mysql://${DB_SLAVE_HOST:localhost}:3307/smart_farm?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+          username: ${DB_USER:root}
+          password: ${DB_PASSWORD:Farm@2024}
+          driver-class-name: com.mysql.cj.jdbc.Driver
+      hikari:
+        # 连接池调优（单节点 20 连接，支持 400 并发请求）
+        max-pool-size: 20
+        min-idle: 5
+        connection-timeout: 30000
+        idle-timeout: 600000
+        max-lifetime: 1800000
+        connection-test-query: SELECT 1
+
+  # ===================== Redis 缓存 =====================
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:Farm@2024}
+      database: 0
+      timeout: 5000ms
+      lettuce:
+        pool:
+          max-active: 32
+          max-idle: 16
+          min-idle: 4
+          max-wait: 3000ms
+
+  # ===================== Kafka 传感器消息队列 =====================
+  kafka:
+    bootstrap-servers: ${KAFKA_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: 1
+      batch-size: 16384
+      linger-ms: 10
+      retries: 3
+      buffer-memory: 33554432
+    consumer:
+      group-id: smart-farm-group
+      auto-offset-reset: latest
+      enable-auto-commit: false
+      max-poll-records: 500
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+    listener:
+      ack-mode: manual_immediate
+      concurrency: 3
+
+  # ===================== 文件上传限制 =====================
   servlet:
     multipart:
       max-file-size: 10MB
       max-request-size: 50MB
 
-# ==================== MyBatis-Plus ====================
+# ===================== MyBatis-Plus 配置 =====================
 mybatis-plus:
   mapper-locations: classpath:mapper/*.xml
   type-aliases-package: com.farm.smart.model.entity
   configuration:
     map-underscore-to-camel-case: true
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
-    # MyBatis-Plus 枚举类型处理器: 使用 @EnumValue 标记的字段进行数据库持久化
     default-enum-type-handler: com.baomidou.mybatisplus.core.handlers.MybatisEnumTypeHandler
   global-config:
     db-config:
@@ -60,62 +115,92 @@ mybatis-plus:
       logic-delete-value: 1
       logic-not-delete-value: 0
 
-# ==================== MQTT 配置 ====================
+# ===================== MQTT 配置（EMQX 集群） =====================
 mqtt:
-  broker-url: tcp://localhost:1883
+  broker-url: tcp://${MQTT_HOST:localhost}:${MQTT_PORT:1883}
   client-id: smart-farm-server-${random.uuid}
-  username: ""
-  password: ""
+  username: ${MQTT_USER:}
+  password: ${MQTT_PASSWORD:}
   keep-alive-interval: 60
   connection-timeout: 30
   default-qos: 1
   topics:
-    - farm/+/sensor/+/data        # 传感器数据上报
-    - farm/+/control/resp          # 设备控制回复
-    - farm/+/device/status         # 设备心跳/状态
+    - farm/+/sensor/+/data
+    - farm/+/control/resp
+    - farm/+/device/status
+    - farm/+/ota/progress
 
-# ==================== InfluxDB 配置 ====================
+# ===================== InfluxDB 配置 =====================
 influxdb:
-  url: http://localhost:8086
-  token: farm-super-token-for-influxdb-access
+  url: http://${INFLUX_HOST:localhost}:8086
+  token: ${INFLUX_TOKEN:farm-super-token-for-influxdb-access}
   org: smart-farm
   bucket: sensor_data
 
-# ==================== AI 病虫害识别服务 ====================
+# ===================== AI 病虫害识别服务 =====================
 ai:
   disease:
-    # 识别服务地址 (本地 YOLOv8 HTTP API 或云端 API)
-    base-url: http://localhost:8501
-    # 接口路径
+    base-url: ${AI_SERVICE_URL:http://localhost:8501}
     detect-path: /api/v1/detect
-    # 默认来源: local / cloud
     default-source: local
-    # 模型版本
     model-version: yolov8n-agri-disease-v1
-    # 请求超时 (毫秒)
     timeout: 30000
-    # 是否启用 (未启用时返回模拟结果, 方便开发测试)
     enabled: false
 
-# ==================== 灌溉调度 ====================
+# ===================== 灌溉调度 =====================
 irrigation:
   schedule:
-    # 检查间隔 (cron), 默认每5分钟
     cron: "0 */5 * * * ?"
-    # 数据聚合间隔 (每小时)
     aggregation-cron: "0 0 * * * ?"
 
-# ==================== JWT 认证配置 ====================
+# ===================== JWT 认证配置 =====================
 jwt:
-  secret: smartFarmJwtSecretKey2026VeryLongSecretString
-  # token 有效期 (毫秒), 默认 24 小时
+  secret: ${JWT_SECRET:smartFarmJwtSecretKey2026VeryLongSecretString}
   expiration: 86400000
 
-# ==================== 日志 ====================
+# ===================== Knife4j 文档配置 =====================
+knife4j:
+  enable: true
+  setting:
+    language: zh_cn
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  api-docs:
+    path: /v3/api-docs
+  group-configs:
+    - group: default
+      paths-to-match: /**
+      packages-to-scan: com.farm.smart.controller
+
+# ===================== Actuator 监控端点 =====================
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,env,configprops,loggers
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: when-authorized
+      probes:
+        enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+      percentiles:
+        http.server.requests: 0.5, 0.95, 0.99
+
+# ===================== 日志配置 =====================
 logging:
   level:
-    root: INFO
-    com.farm.smart: DEBUG
-    org.eclipse.paho: INFO
+    com.farm.smart: ${LOG_LEVEL:debug}
+    org.eclipse.paho: info
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"

@@ -20,6 +20,9 @@ public class Farm implements Serializable {
     @TableId(type = IdType.AUTO)
     private Long id;
 
+    /** 租户ID（多租户隔离） */
+    private Long tenantId;
+
     /** 农场名称 */
     private String name;
 

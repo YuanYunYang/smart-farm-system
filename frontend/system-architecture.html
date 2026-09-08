@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>智慧农业大数据平台 — 系统联动架构图</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family:"Microsoft YaHei","PingFang SC",-apple-system,sans-serif;
+  background:linear-gradient(180deg,#0a1e15 0%,#0d2818 40%,#0a2014 70%,#061810 100%);
+  color:#e0e0e0;
+  overflow-x:auto;
+  min-height:100vh;
+}
+.wrap {
+  min-width:1400px;
+  max-width:1920px;
+  margin:0 auto;
+  padding:20px 30px 40px;
+}
+/* Header */
+.hdr {
+  text-align:center;
+  margin-bottom:16px;
+}
+.hdr h1 {
+  font-size:24px;
+  font-weight:700;
+  letter-spacing:6px;
+  background:linear-gradient(135deg,#00ff88,#00d4ff,#7c4dff);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+  text-shadow:0 0 30px rgba(0,255,136,0.2);
+}
+.hdr .sub {
+  font-size:12px;
+  color:#4a7a5a;
+  letter-spacing:3px;
+  margin-top:4px;
+}
+
+/* Main SVG container */
+.svg-box {
+  background:rgba(10,30,21,0.6);
+  border:1px solid rgba(0,255,136,0.1);
+  border-radius:12px;
+  padding:20px;
+  box-shadow:0 0 40px rgba(0,255,136,0.05);
+  position:relative;
+}
+.svg-box svg {
+  display:block;
+  width:100%;
+  height:auto;
+}
+
+/* Legend */
+.legend-bar {
+  display:flex;
+  justify-content:center;
+  gap:30px;
+  margin-top:14px;
+  flex-wrap:wrap;
+}
+.lg-item {
+  display:flex;
+  align-items:center;
+  gap:6px;
+  font-size:12px;
+  color:#888;
+}
+.lg-dot {
+  width:14px;
+  height:14px;
+  border-radius:3px;
+}
+
+/* Tooltip */
+.tooltip {
+  position:fixed;
+  background:rgba(10,30,21,0.95);
+  border:1px solid rgba(0,255,136,0.3);
+  border-radius:8px;
+  padding:8px 14px;
+  font-size:12px;
+  color:#e0e0e0;
+  pointer-events:none;
+  z-index:999;
+  opacity:0;
+  transition:opacity 0.2s;
+  max-width:300px;
+  box-shadow:0 4px 20px rgba(0,0,0,0.5);
+}
+.tooltip.show { opacity:1; }
+.tooltip .tt-title {
+  font-weight:700;
+  color:#00ff88;
+  margin-bottom:4px;
+}
+.tooltip .tt-row {
+  color:#aaa;
+  font-size:11px;
+  line-height:1.6;
+}
+
+/* Stats */
+.stats-row {
+  display:flex;
+  justify-content:center;
+  gap:50px;
+  margin-top:16px;
+  padding:16px;
+  border-top:1px solid rgba(255,255,255,0.04);
+}
+.st { text-align:center; }
+.st .n {
+  font-size:26px;
+  font-weight:700;
+  background:linear-gradient(135deg,#00ff88,#00d4ff);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+.st .l { font-size:11px; color:#555; margin-top:2px; }
+
+/* Animations */
+@keyframes flow-dash {
+  to { stroke-dashoffset:-20; }
+}
+@keyframes pulse-node {
+  0%,100% { opacity:0.4; r:4; }
+  50% { opacity:1; r:8; }
+}
+@keyframes blink {
+  0%,100% { opacity:1; }
+  50% { opacity:0.3; }
+}
+@keyframes glow-text {
+  0%,100% { text-shadow:0 0 5px currentColor; }
+  50% { text-shadow:0 0 15px currentColor; }
+}
+
+.flow-line {
+  fill:none;
+  stroke-dasharray:6 4;
+  animation:flow-dash 1s linear infinite;
+}
+
+.pulse-dot {
+  animation:pulse-node 2s ease-in-out infinite;
+}
+.blink-rect {
+  animation:blink 2s ease-in-out infinite;
+}
+
+/* Zone hover */
+.zone-group { cursor:pointer; transition:opacity 0.3s; }
+.zone-group:hover { opacity:0.85; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="hdr">
+    <h1>智慧农业大数据平台 — 系统联动架构图</h1>
+    <div class="sub">SMART AGRICULTURE · DEVICE-ZONE-SYSTEM INTERACTION DIAGRAM</div>
+  </div>
+
+  <div class="svg-box">
+    <svg viewBox="0 0 1800 1100" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <!-- Gradients -->
+        <linearGradient id="grad-green" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#1a5a3a"/>
+          <stop offset="100%" stop-color="#0d3d28"/>
+        </linearGradient>
+        <linearGradient id="grad-blue" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#1a4a7a"/>
+          <stop offset="100%" stop-color="#0d3358"/>
+        </linearGradient>
+        <linearGradient id="grad-orange" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#7a4a1a"/>
+          <stop offset="100%" stop-color="#5a3310"/>
+        </linearGradient>
+        <linearGradient id="grad-purple" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#4a1a7a"/>
+          <stop offset="100%" stop-color="#330d58"/>
+        </linearGradient>
+        <linearGradient id="grad-cyan" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#0a4a5a"/>
+          <stop offset="100%" stop-color="#06333d"/>
+        </linearGradient>
+        <linearGradient id="grad-farm" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#1a3a1a"/>
+          <stop offset="100%" stop-color="#0d2810"/>
+        </linearGradient>
+        <linearGradient id="grad-glass" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="rgba(255,255,255,0.08)"/>
+          <stop offset="100%" stop-color="rgba(255,255,255,0.02)"/>
+        </linearGradient>
+
+        <!-- Arrow markers -->
+        <marker id="arrow-green" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0,0 L10,5 L0,10 Z" fill="#00ff88" opacity="0.8"/>
+        </marker>
+        <marker id="arrow-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0,0 L10,5 L0,10 Z" fill="#00d4ff" opacity="0.8"/>
+        </marker>
+        <marker id="arrow-orange" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0,0 L10,5 L0,10 Z" fill="#ff9500" opacity="0.8"/>
+        </marker>
+        <marker id="arrow-purple" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0,0 L10,5 L0,10 Z" fill="#a855f7" opacity="0.8"/>
+        </marker>
+        <marker id="arrow-red" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0,0 L10,5 L0,10 Z" fill="#ff4d4f" opacity="0.8"/>
+        </marker>
+
+        <!-- Glow filter -->
+        <filter id="glow">
+          <feGaussianBlur stdDeviation="3" result="blur"/>
+          <feMerge>
+            <feMergeNode in="blur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+        <filter id="soft-shadow">
+          <feGaussianBlur stdDeviation="2" result="blur"/>
+          <feOffset dx="0" dy="2" result="offBlur"/>
+          <feMerge>
+            <feMergeNode in="offBlur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+      </defs>
+
+      <!-- ===== Background ===== -->
+      <rect width="1800" height="1100" fill="url(#grad-farm)" rx="8"/>
+
+      <!-- ===== LAYER 1: 云平台层 (Top, y=20-180) ===== -->
+      <g class="layer-platform">
+        <!-- Platform background -->
+        <rect x="200" y="20" width="1400" height="160" rx="12" fill="rgba(0,255,136,0.04)" stroke="rgba(0,255,136,0.15)" stroke-width="1"/>
+        <text x="900" y="45" text-anchor="middle" fill="#00ff88" font-size="16" font-weight="700" letter-spacing="4" style="text-shadow:0 0 10px #00ff88">☁ 智慧农业大数据云平台 (SaaS)</text>
+
+        <!-- Cloud platform modules -->
+        <!-- Device Mgmt -->
+        <g class="zone-group" data-tip="设备管理|设备注册/分组/OTA升级/在线状态/生命周期管理|平台核心服务">
+          <rect x="230" y="60" width="140" height="50" rx="8" fill="rgba(0,255,136,0.06)" stroke="#00ff88" stroke-width="1.5" filter="url(#soft-shadow)"/>
+          <text x="300" y="82" text-anchor="middle" fill="#00ff88" font-size="13" font-weight="600">📟 设备管理</text>
+          <text x="300" y="98" text-anchor="middle" fill="#888" font-size="10">注册·OTA·状态</text>
+        </g>
+        <!-- MQTT Auth -->
+        <g class="zone-group" data-tip="设备认证|EMQX HTTP Auth·per-device身份验证·Topic ACL|安全认证服务">
+          <rect x="390" y="60" width="140" height="50" rx="8" fill="rgba(0,255,136,0.06)" stroke="#00ff88" stroke-width="1.5" filter="url(#soft-shadow)"/>
+          <text x="460" y="82" text-anchor="middle" fill="#00ff88" font-size="13" font-weight="600">🔐 设备认证</text>
+          <text x="460" y="98" text-anchor="middle" fill="#888" font-size="10">MQTT Auth·ACL</text>
+        </g>
+        <!-- Rule Engine -->
+        <g class="zone-group" data-tip="Drools规则引擎|动态规则加载·热重载·复杂告警逻辑·联动策略|核心决策引擎">
+          <rect x="550" y="60" width="140" height="50" rx="8" fill="rgba(0,255,136,0.08)" stroke="#00ff88" stroke-width="2" filter="url(#glow)"/>
+          <text x="620" y="82" text-anchor="middle" fill="#00ff88" font-size="13" font-weight="600">📐 规则引擎</text>
+          <text x="620" y="98" text-anchor="middle" fill="#888" font-size="10">Drools·热加载</text>
+        </g>
+        <!-- AI Engine -->
+        <g class="zone-group" data-tip="AI引擎|虫情AI识别·病害预测·产量预测·决策辅助|智能分析服务">
+          <rect x="710" y="60" width="140" height="50" rx="8" fill="rgba(0,255,136,0.08)" stroke="#00ff88" stroke-width="2" filter="url(#glow)"/>
+          <text x="780" y="82" text-anchor="middle" fill="#00ff88" font-size="13" font-weight="600">🧠 AI引擎</text>
+          <text x="780" y="98" text-anchor="middle" fill="#888" font-size="10">识别·预测·决策</text>
+        </g>
+        <!-- Kafka MQ -->
+        <g class="zone-group" data-tip="Kafka消息队列|高吞吐异步解耦·设备数据缓冲·事件驱动|消息中间件">
+          <rect x="870" y="60" width="140" height="50" rx="8" fill="rgba(0,255,136,0.06)" stroke="#00ff88" stroke-width="1.5" filter="url(#soft-shadow)"/>
+          <text x="940" y="82" text-anchor="middle" fill="#00ff88" font-size="13" font-weight="600">📨 消息队列</text>
+          <text x="940" y="98" text-anchor="middle" fill="#888" font-size="10">Kafka·异步解耦</text>
+        </g>
+        <!-- Multi-tenant -->
+        <g class="zone-group" data-tip="多租户SaaS|tenant_id隔离·MyBatis拦截器·数据权限隔离|SaaS架构核心">
+          <rect x="1030" y="60" width="140" height="50" rx="8" fill="rgba(0,255,136,0.06)" stroke="#00ff88" stroke-width="1.5" filter="url(#soft-shadow)"/>
+          <text x="1100" y="82" text-anchor="middle" fill="#00ff88" font-size="13" font-weight="600">🏢 多租户</text>
+          <text x="1100" y="98" text-anchor="middle" fill="#888" font-size="10">隔离·SaaS</text>
+        </g>
+        <!-- Monitoring -->
+        <g class="zone-group" data-tip="监控运维|Actuator+Prometheus·健康检查·指标暴露·告警|运维监控">
+          <rect x="1190" y="60" width="140" height="50" rx="8" fill="rgba(0,255,136,0.06)" stroke="#00ff88" stroke-width="1.5" filter="url(#soft-shadow)"/>
+          <text x="1260" y="82" text-anchor="middle" fill="#00ff88" font-size="13" font-weight="600">📊 监控运维</text>
+          <text x="1260" y="98" text-anchor="middle" fill="#888" font-size="10">Prometheus</text>
+        </g>
+        <!-- Data Storage -->
+        <g class="zone-group" data-tip="数据存储|MySQL业务数据·InfluxDB时序·Redis缓存·MinIO对象|数据层">
+          <rect x="1350" y="60" width="220" height="50" rx="8" fill="rgba(255,77,159,0.06)" stroke="#ff4d9f" stroke-width="1.5" filter="url(#soft-shadow)"/>
+          <text x="1460" y="82" text-anchor="middle" fill="#ff4d9f" font-size="13" font-weight="600">💾 数据存储层</text>
+          <text x="1460" y="98" text-anchor="middle" fill="#888" font-size="10">MySQL·InfluxDB·Redis·MinIO</text>
+        </g>
+
+        <!-- Platform label -->
+        <rect x="40" y="60" width="140" height="50" rx="8" fill="url(#grad-green)" stroke="#00ff88" stroke-width="1"/>
+        <text x="110" y="82" text-anchor="middle" fill="#fff" font-size="14" font-weight="700">☁ 平台层</text>
+        <text x="110" y="98" text-anchor="middle" fill="#90EE90" font-size="9">PLATFORM</text>
+      </g>
+
+      <!-- ===== LAYER 2: 应用服务层 (y=210-350) ===== -->
+      <g class="layer-app">
+        <rect x="200" y="210" width="1400" height="140" rx="12" fill="rgba(255,149,0,0.04)" stroke="rgba(255,149,0,0.12)" stroke-width="1"/>
+        <text x="900" y="235" text-anchor="middle" fill="#ff9500" font-size="14" font-weight="600" letter-spacing="3">🌐 应用服务层 (Application Layer)</text>
+
+        <!-- App modules - Row 1 -->
+        <g class="zone-group" data-tip="气象监测|温度/湿度/风速/风向/雨量/气压/CO2/PM2.5 等15+参数|对应设备：气象站">
+          <rect x="230" y="250" width="120" height="42" rx="6" fill="rgba(255,149,0,0.06)" stroke="#ff9500" stroke-width="1.2"/>
+          <text x="290" y="268" text-anchor="middle" fill="#ff9500" font-size="12" font-weight="600">🌤️ 气象监测</text>
+          <text x="290" y="284" text-anchor="middle" fill="#888" font-size="9">15+参数</text>
+        </g>
+        <g class="zone-group" data-tip="土壤墒情|土温/水分/PH/张力/电导率·分层监测10-50cm|对应设备：土壤传感器">
+          <rect x="365" y="250" width="120" height="42" rx="6" fill="rgba(255,149,0,0.06)" stroke="#ff9500" stroke-width="1.2"/>
+          <text x="425" y="268" text-anchor="middle" fill="#ff9500" font-size="12" font-weight="600">🌱 土壤墒情</text>
+          <text x="425" y="284" text-anchor="middle" fill="#888" font-size="9">分层监测</text>
+        </g>
+        <g class="zone-group" data-tip="水质监测|pH/溶解氧/氨氮/浊度/余氯|对应设备：水质传感器探头">
+          <rect x="500" y="250" width="120" height="42" rx="6" fill="rgba(255,149,0,0.06)" stroke="#ff9500" stroke-width="1.2"/>
+          <text x="560" y="268" text-anchor="middle" fill="#ff9500" font-size="12" font-weight="600">💧 水质监测</text>
+          <text x="560" y="284" text-anchor="middle" fill="#888" font-size="9">6指标</text>
+        </g>
+        <g class="zone-group" data-tip="智能控制|开关量/正反转/百分比·远程/定时/自动|对应设备：控制器/电磁阀">
+          <rect x="635" y="250" width="120" height="42" rx="6" fill="rgba(255,149,0,0.08)" stroke="#ff9500" stroke-width="1.5" filter="url(#glow)"/>
+          <text x="695" y="268" text-anchor="middle" fill="#ff9500" font-size="12" font-weight="600">🎮 智能控制</text>
+          <text x="695" y="284" text-anchor="middle" fill="#888" font-size="9">3种模式</text>
+        </g>
+        <g class="zone-group" data-tip="智能灌溉|阀门控制/水肥一体/节水节肥|对应设备：电磁阀/水泵/水肥机">
+          <rect x="770" y="250" width="120" height="42" rx="6" fill="rgba(255,149,0,0.06)" stroke="#ff9500" stroke-width="1.2"/>
+          <text x="830" y="268" text-anchor="middle" fill="#ff9500" font-size="12" font-weight="600">🚿 智能灌溉</text>
+          <text x="830" y="284" text-anchor="middle" fill="#888" font-size="9">水肥一体</text>
+        </g>
+        <g class="zone-group" data-tip="视频监控|苗情/灾情/通用视频·PTZ云台·24h实时|对应设备：PTZ摄像头">
+          <rect x="905" y="250" width="120" height="42" rx="6" fill="rgba(255,149,0,0.06)" stroke="#ff9500" stroke-width="1.2"/>
+          <text x="965" y="268" text-anchor="middle" fill="#ff9500" font-size="12" font-weight="600">📹 视频监控</text>
+          <text x="965" y="284" text-anchor="middle" fill="#888" font-size="9">PTZ云台</text>
+        </g>
+        <g class="zone-group" data-tip="虫情监测|自动诱虫/AI识别/趋势分析/种类统计|对应设备：虫情测报仪">
+          <rect x="1040" y="250" width="120" height="42" rx="6" fill="rgba(255,149,0,0.06)" stroke="#ff9500" stroke-width="1.2"/>
+          <text x="1100" y="268" text-anchor="middle" fill="#ff9500" font-size="12" font-weight="600">🦗 虫情监测</text>
+          <text x="1100" y="284" text-anchor="middle" fill="#888" font-size="9">AI识别</text>
+        </g>
+        <g class="zone-group" data-tip="孢子监测|全天候采集/种类识别/病害预警|对应设备：孢子捕捉仪">
+          <rect x="1175" y="250" width="120" height="42" rx="6" fill="rgba(255,149,0,0.06)" stroke="#ff9500" stroke-width="1.2"/>
+          <text x="1235" y="268" text-anchor="middle" fill="#ff9500" font-size="12" font-weight="600">🔬 孢子监测</text>
+          <text x="1235" y="284" text-anchor="middle" fill="#888" font-size="9">全天候</text>
+        </g>
+        <g class="zone-group" data-tip="产品溯源|一物一码/全流程追溯/种植→加工→销售|对应设备：扫码设备">
+          <rect x="1310" y="250" width="120" height="42" rx="6" fill="rgba(255,149,0,0.06)" stroke="#ff9500" stroke-width="1.2"/>
+          <text x="1370" y="268" text-anchor="middle" fill="#ff9500" font-size="12" font-weight="600">🔗 产品溯源</text>
+          <text x="1370" y="284" text-anchor="middle" fill="#888" font-size="9">一物一码</text>
+        </g>
+        <g class="zone-group" data-tip="能耗管理|电表/水表采集/碳排放核算/负荷调度|对应设备：智能电表/水表">
+          <rect x="1445" y="250" width="120" height="42" rx="6" fill="rgba(255,149,0,0.06)" stroke="#ff9500" stroke-width="1.2"/>
+          <text x="1505" y="268" text-anchor="middle" fill="#ff9500" font-size="12" font-weight="600">⚡ 能耗管理</text>
+          <text x="1505" y="284" text-anchor="middle" fill="#888" font-size="9">碳排放</text>
+        </g>
+
+        <!-- App label -->
+        <rect x="40" y="255" width="140" height="42" rx="8" fill="url(#grad-orange)"/>
+        <text x="110" y="275" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">🌐 应用层</text>
+        <text x="110" y="290" text-anchor="middle" fill="#FFD700" font-size="9">APPLICATION</text>
+      </g>
+
+      <!-- ===== LAYER 3: 展示层 (y=380-470) ===== -->
+      <g class="layer-pres">
+        <rect x="200" y="380" width="1400" height="80" rx="12" fill="rgba(168,85,247,0.04)" stroke="rgba(168,85,247,0.12)" stroke-width="1"/>
+        <text x="900" y="405" text-anchor="middle" fill="#a855f7" font-size="13" font-weight="600" letter-spacing="2">🖥️ 展示层 (Presentation Layer)</text>
+
+        <g class="zone-group" data-tip="PC管理台|20个功能模块·全量管理操作·SPA单页应用|桌面端">
+          <rect x="300" y="420" width="140" height="30" rx="6" fill="rgba(168,85,247,0.06)" stroke="#a855f7" stroke-width="1.2"/>
+          <text x="370" y="440" text-anchor="middle" fill="#a855f7" font-size="12" font-weight="600">💻 PC管理台</text>
+        </g>
+        <g class="zone-group" data-tip="移动端H5|实时监测/远程控制/告警通知/扫码溯源|移动端">
+          <rect x="470" y="420" width="140" height="30" rx="6" fill="rgba(168,85,247,0.06)" stroke="#a855f7" stroke-width="1.2"/>
+          <text x="540" y="440" text-anchor="middle" fill="#a855f7" font-size="12" font-weight="600">📱 移动端H5</text>
+        </g>
+        <g class="zone-group" data-tip="大屏可视化|3列9面板·自动轮显·LED大屏|展示端">
+          <rect x="640" y="420" width="140" height="30" rx="6" fill="rgba(168,85,247,0.08)" stroke="#a855f7" stroke-width="1.5" filter="url(#glow)"/>
+          <text x="710" y="440" text-anchor="middle" fill="#a855f7" font-size="12" font-weight="600">📺 大屏可视化</text>
+        </g>
+        <g class="zone-group" data-tip="数据看板|图表/表格切换·导出Excel/PDF/CSV|报表端">
+          <rect x="810" y="420" width="140" height="30" rx="6" fill="rgba(168,85,247,0.06)" stroke="#a855f7" stroke-width="1.2"/>
+          <text x="880" y="440" text-anchor="middle" fill="#a855f7" font-size="12" font-weight="600">📊 数据看板</text>
+        </g>
+        <g class="zone-group" data-tip="远程报警|邮件报警/短信报警/站内消息/微信推送|告警通知">
+          <rect x="980" y="420" width="140" height="30" rx="6" fill="rgba(168,85,247,0.06)" stroke="#a855f7" stroke-width="1.2"/>
+          <text x="1050" y="440" text-anchor="middle" fill="#a855f7" font-size="12" font-weight="600">🔔 远程报警</text>
+        </g>
+
+        <rect x="40" y="415" width="140" height="42" rx="8" fill="url(#grad-purple)"/>
+        <text x="110" y="435" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">🖥️ 展示层</text>
+        <text x="110" y="450" text-anchor="middle" fill="#C084FC" font-size="9">PRESENTATION</text>
+      </g>
+
+      <!-- ===== FLOW LINES: Platform ↔ Application (bidirectional) ===== -->
+      <!-- Data up flow (green, from app to platform) -->
+      <path class="flow-line" d="M 620,210 L 620,180" stroke="#00ff88" stroke-width="2" marker-end="url(#arrow-green)" opacity="0.6"/>
+      <path class="flow-line" d="M 780,210 L 780,180" stroke="#00ff88" stroke-width="2" marker-end="url(#arrow-green)" opacity="0.6"/>
+      <path class="flow-line" d="M 940,210 L 940,180" stroke="#00ff88" stroke-width="2" marker-end="url(#arrow-green)" opacity="0.6"/>
+      <!-- Control down flow (orange, from platform to app) -->
+      <path class="flow-line" d="M 300,180 L 300,210" stroke="#ff9500" stroke-width="2" marker-end="url(#arrow-orange)" opacity="0.6"/>
+      <path class="flow-line" d="M 460,180 L 460,210" stroke="#ff9500" stroke-width="2" marker-end="url(#arrow-orange)" opacity="0.6"/>
+      <path class="flow-line" d="M 1100,180 L 1100,210" stroke="#ff9500" stroke-width="2" marker-end="url(#arrow-orange)" opacity="0.6"/>
+
+      <!-- ===== FLOW LINES: Application ↔ Presentation ===== -->
+      <path class="flow-line" d="M 500,380 L 500,350" stroke="#a855f7" stroke-width="1.5" opacity="0.4"/>
+      <path class="flow-line" d="M 700,380 L 700,350" stroke="#a855f7" stroke-width="1.5" opacity="0.4"/>
+      <path class="flow-line" d="M 900,380 L 900,350" stroke="#a855f7" stroke-width="1.5" opacity="0.4"/>
+      <path class="flow-line" d="M 1100,380 L 1100,350" stroke="#a855f7" stroke-width="1.5" opacity="0.4"/>
+
+      <!-- ===== LAYER 4: 农场区域+设备 (y=500-1080) ===== -->
+      <!-- Farm ground -->
+      <rect x="20" y="500" width="1760" height="580" rx="12" fill="rgba(26,58,26,0.3)" stroke="rgba(82,196,26,0.1)" stroke-width="1"/>
+
+      <!-- Zone label -->
+      <rect x="40" y="510" width="140" height="50" rx="8" fill="url(#grad-green)"/>
+      <text x="110" y="532" text-anchor="middle" fill="#fff" font-size="14" font-weight="700">🌡️ 感知层</text>
+      <text x="110" y="548" text-anchor="middle" fill="#90EE90" font-size="9">PERCEPTION</text>
+
+      <!-- ===== ZONE A: 气象监测区 (Left, x=40-380) ===== -->
+      <g class="zone-group" data-tip="气象监测区|设备：气象站(风速/风向/雨量/温湿度/气压/CO2/PM2.5)|上报Topic: iot/device/{id}/weather">
+        <rect x="40" y="580" width="340" height="230" rx="10" fill="rgba(82,196,26,0.05)" stroke="rgba(82,196,26,0.2)" stroke-width="1.5" stroke-dasharray="5 3"/>
+        <text x="210" y="605" text-anchor="middle" fill="#52c41a" font-size="13" font-weight="600">📍 A区 - 气象监测区</text>
+
+        <!-- Weather Station -->
+        <rect x="70" y="620" width="130" height="55" rx="6" fill="rgba(82,196,26,0.08)" stroke="#52c41a" stroke-width="1.5"/>
+        <text x="135" y="640" text-anchor="middle" fill="#52c41a" font-size="12" font-weight="600">🌤️ 气象站</text>
+        <text x="135" y="656" text-anchor="middle" fill="#aaa" font-size="9">风速·风向·雨量</text>
+        <text x="135" y="668" text-anchor="middle" fill="#aaa" font-size="9">CO₂·PM2.5·气压</text>
+        <!-- Pulse indicator -->
+        <circle class="pulse-dot" cx="185" cy="625" r="5" fill="#52c41a"/>
+
+        <!-- LED Display -->
+        <rect x="220" y="620" width="130" height="55" rx="6" fill="rgba(239,83,80,0.08)" stroke="#EF5350" stroke-width="1.5"/>
+        <text x="285" y="640" text-anchor="middle" fill="#EF5350" font-size="12" font-weight="600">📺 LED大屏</text>
+        <text x="285" y="656" text-anchor="middle" fill="#aaa" font-size="9">实时数据展示</text>
+        <text x="285" y="668" text-anchor="middle" fill="#aaa" font-size="9">园区入口</text>
+        <circle class="blink-rect" cx="330" cy="625" r="4" fill="#EF5350"/>
+
+        <!-- Data flow label -->
+        <text x="210" y="710" text-anchor="middle" fill="#52c41a" font-size="10" opacity="0.7">↑ MQTT上报 → Kafka → 平台</text>
+        <text x="210" y="725" text-anchor="middle" fill="#ff9500" font-size="10" opacity="0.7">↓ 平台指令 → 看板刷新</text>
+
+        <!-- Connection to app layer -->
+        <path class="flow-line" d="M 210,580 L 210,350" stroke="#52c41a" stroke-width="2" marker-end="url(#arrow-green)" opacity="0.5"/>
+        <text x="225" y="480" fill="#52c41a" font-size="9" opacity="0.6" transform="rotate(-90 225 480)">数据上报</text>
+      </g>
+
+      <!-- ===== ZONE B: 温室大棚区 (Center-Left, x=400-720) ===== -->
+      <g class="zone-group" data-tip="温室大棚区|设备：温室(卷帘/风机/遮阳/补光)·控制器·电表|控制Topic: iot/device/{id}/command">
+        <rect x="400" y="580" width="320" height="230" rx="10" fill="rgba(0,255,136,0.05)" stroke="rgba(0,255,136,0.2)" stroke-width="1.5" stroke-dasharray="5 3"/>
+        <text x="560" y="605" text-anchor="middle" fill="#00ff88" font-size="13" font-weight="600">📍 B区 - 温室大棚区</text>
+
+        <!-- Greenhouse A -->
+        <rect x="425" y="620" width="125" height="55" rx="6" fill="rgba(0,255,136,0.06)" stroke="#00ff88" stroke-width="1.5"/>
+        <text x="487" y="640" text-anchor="middle" fill="#00ff88" font-size="11" font-weight="600">🏡 温室A</text>
+        <text x="487" y="656" text-anchor="middle" fill="#aaa" font-size="9">卷帘·风机·遮阳</text>
+        <text x="487" y="668" text-anchor="middle" fill="#aaa" font-size="9">补光灯·温控</text>
+        <circle class="pulse-dot" cx="530" cy="625" r="5" fill="#00ff88"/>
+
+        <!-- Smart Controller -->
+        <rect x="565" y="620" width="125" height="55" rx="6" fill="rgba(255,149,0,0.08)" stroke="#ff9500" stroke-width="1.5"/>
+        <text x="627" y="640" text-anchor="middle" fill="#ff9500" font-size="11" font-weight="600">🎮 控制器</text>
+        <text x="627" y="656" text-anchor="middle" fill="#aaa" font-size="9">开关·正反转</text>
+        <text x="627" y="668" text-anchor="middle" fill="#aaa" font-size="9">百分比调节</text>
+        <circle class="pulse-dot" cx="670" cy="625" r="5" fill="#ff9500"/>
+
+        <!-- Electricity Meter -->
+        <rect x="425" y="690" width="125" height="45" rx="6" fill="rgba(255,149,0,0.06)" stroke="#ff9500" stroke-width="1"/>
+        <text x="487" y="708" text-anchor="middle" fill="#ff9500" font-size="11" font-weight="600">⚡ 电表</text>
+        <text x="487" y="722" text-anchor="middle" fill="#aaa" font-size="9">Modbus·CT变比</text>
+        <circle class="pulse-dot" cx="530" cy="695" r="4" fill="#ff9500"/>
+
+        <!-- CO2 Sensor -->
+        <rect x="565" y="690" width="125" height="45" rx="6" fill="rgba(82,196,26,0.06)" stroke="#52c41a" stroke-width="1"/>
+        <text x="627" y="708" text-anchor="middle" fill="#52c41a" font-size="11" font-weight="600">🟢 CO₂传感器</text>
+        <text x="627" y="722" text-anchor="middle" fill="#aaa" font-size="9">环境监测</text>
+        <circle class="pulse-dot" cx="670" cy="695" r="4" fill="#52c41a"/>
+
+        <text x="560" y="755" text-anchor="middle" fill="#00ff88" font-size="10" opacity="0.7">↑ 环境/能耗数据上报</text>
+        <text x="560" y="770" text-anchor="middle" fill="#ff9500" font-size="10" opacity="0.7">↓ 平台→规则引擎→自动控制</text>
+
+        <!-- Bidirectional connection -->
+        <path class="flow-line" d="M 560,580 L 560,350" stroke="#00ff88" stroke-width="2" marker-end="url(#arrow-green)" opacity="0.5"/>
+        <path class="flow-line" d="M 600,350 L 600,580" stroke="#ff9500" stroke-width="2" marker-end="url(#arrow-orange)" opacity="0.5"/>
+      </g>
+
+      <!-- ===== ZONE C: 大田种植区 (Center, x=740-1060) ===== -->
+      <g class="zone-group" data-tip="大田种植区|设备：土壤传感器(分层)·灌溉电磁阀·QR溯源牌|数据Topic: iot/device/{id}/soil">
+        <rect x="740" y="580" width="320" height="230" rx="10" fill="rgba(82,196,26,0.05)" stroke="rgba(82,196,26,0.2)" stroke-width="1.5" stroke-dasharray="5 3"/>
+        <text x="900" y="605" text-anchor="middle" fill="#52c41a" font-size="13" font-weight="600">📍 C区 - 大田种植区</text>
+
+        <!-- Soil Sensor -->
+        <rect x="765" y="620" width="130" height="55" rx="6" fill="rgba(82,196,26,0.08)" stroke="#52c41a" stroke-width="1.5"/>
+        <text x="830" y="640" text-anchor="middle" fill="#52c41a" font-size="11" font-weight="600">🌱 土壤传感器</text>
+        <text x="830" y="656" text-anchor="middle" fill="#aaa" font-size="9">土温·水分·PH</text>
+        <text x="830" y="668" text-anchor="middle" fill="#aaa" font-size="9">张力·电导率</text>
+        <circle class="pulse-dot" cx="875" cy="625" r="5" fill="#52c41a"/>
+
+        <!-- Irrigation Valve -->
+        <rect x="910" y="620" width="130" height="55" rx="6" fill="rgba(0,149,255,0.08)" stroke="#0095ff" stroke-width="1.5"/>
+        <text x="975" y="640" text-anchor="middle" fill="#0095ff" font-size="11" font-weight="600">🚿 灌溉电磁阀</text>
+        <text x="975" y="656" text-anchor="middle" fill="#aaa" font-size="9">滴灌·喷灌</text>
+        <text x="975" y="668" text-anchor="middle" fill="#aaa" font-size="9">远程开关控制</text>
+        <circle class="blink-rect" cx="1020" cy="625" r="5" fill="#0095ff"/>
+
+        <!-- QR Code -->
+        <rect x="765" y="690" width="130" height="45" rx="6" fill="rgba(255,213,79,0.08)" stroke="#FFD54F" stroke-width="1"/>
+        <text x="830" y="708" text-anchor="middle" fill="#FFD54F" font-size="11" font-weight="600">🔗 溯源二维码</text>
+        <text x="830" y="722" text-anchor="middle" fill="#aaa" font-size="9">一物一码</text>
+
+        <!-- Water Meter -->
+        <rect x="910" y="690" width="130" height="45" rx="6" fill="rgba(0,149,255,0.06)" stroke="#0095ff" stroke-width="1"/>
+        <text x="975" y="708" text-anchor="middle" fill="#0095ff" font-size="11" font-weight="600">💧 水表</text>
+        <text x="975" y="722" text-anchor="middle" fill="#aaa" font-size="9">用水量计量</text>
+
+        <text x="900" y="755" text-anchor="middle" fill="#52c41a" font-size="10" opacity="0.7">↑ 土壤/用水数据上报</text>
+        <text x="900" y="770" text-anchor="middle" fill="#ff9500" font-size="10" opacity="0.7">↓ 智能灌溉策略→阀门控制</text>
+
+        <path class="flow-line" d="M 830,580 L 830,350" stroke="#52c41a" stroke-width="2" marker-end="url(#arrow-green)" opacity="0.5"/>
+        <path class="flow-line" d="M 975,350 L 975,580" stroke="#ff9500" stroke-width="2" marker-end="url(#arrow-orange)" opacity="0.5"/>
+      </g>
+
+      <!-- ===== ZONE D: 灌溉控制区 (Center-Right, x=1080-1400) ===== -->
+      <g class="zone-group" data-tip="灌溉控制区|设备：水肥一体机·储水罐·水泵·水流计|控制Topic: iot/device/{id}/irrigation">
+        <rect x="1080" y="580" width="320" height="230" rx="10" fill="rgba(0,149,255,0.05)" stroke="rgba(0,149,255,0.2)" stroke-width="1.5" stroke-dasharray="5 3"/>
+        <text x="1240" y="605" text-anchor="middle" fill="#0095ff" font-size="13" font-weight="600">📍 D区 - 灌溉控制区</text>
+
+        <!-- Water-Fertilizer Machine -->
+        <rect x="1105" y="620" width="130" height="55" rx="6" fill="rgba(0,149,255,0.08)" stroke="#0095ff" stroke-width="1.5"/>
+        <text x="1170" y="640" text-anchor="middle" fill="#0095ff" font-size="11" font-weight="600">🏭 水肥一体机</text>
+        <text x="1170" y="656" text-anchor="middle" fill="#aaa" font-size="9">水肥混合·配比</text>
+        <text x="1170" y="668" text-anchor="middle" fill="#aaa" font-size="9">EC·pH调节</text>
+        <circle class="pulse-dot" cx="1215" cy="625" r="5" fill="#0095ff"/>
+
+        <!-- Water Tank -->
+        <rect x="1250" y="620" width="130" height="55" rx="6" fill="rgba(0,149,255,0.06)" stroke="#0095ff" stroke-width="1"/>
+        <text x="1315" y="640" text-anchor="middle" fill="#0095ff" font-size="11" font-weight="600">🛢️ 储水罐</text>
+        <text x="1315" y="656" text-anchor="middle" fill="#aaa" font-size="9">液位监测</text>
+        <text x="1315" y="668" text-anchor="middle" fill="#aaa" font-size="9">自动补水</text>
+
+        <!-- Water Pump -->
+        <rect x="1105" y="690" width="130" height="45" rx="6" fill="rgba(0,149,255,0.06)" stroke="#0095ff" stroke-width="1"/>
+        <text x="1170" y="708" text-anchor="middle" fill="#0095ff" font-size="11" font-weight="600">🔄 水泵</text>
+        <text x="1170" y="722" text-anchor="middle" fill="#aaa" font-size="9">正反转控制</text>
+
+        <!-- Flow Meter -->
+        <rect x="1250" y="690" width="130" height="45" rx="6" fill="rgba(0,149,255,0.06)" stroke="#0095ff" stroke-width="1"/>
+        <text x="1315" y="708" text-anchor="middle" fill="#0095ff" font-size="11" font-weight="600">📊 水流计</text>
+        <text x="1315" y="722" text-anchor="middle" fill="#aaa" font-size="9">流量监测</text>
+
+        <text x="1240" y="755" text-anchor="middle" fill="#0095ff" font-size="10" opacity="0.7">↑ 液位/流量数据上报</text>
+        <text x="1240" y="770" text-anchor="middle" fill="#ff9500" font-size="10" opacity="0.7">↓ 灌溉策略→水泵/阀门控制</text>
+
+        <path class="flow-line" d="M 1170,580 L 1170,350" stroke="#0095ff" stroke-width="2" marker-end="url(#arrow-blue)" opacity="0.5"/>
+        <path class="flow-line" d="M 1315,350 L 1315,580" stroke="#ff9500" stroke-width="2" marker-end="url(#arrow-orange)" opacity="0.5"/>
+      </g>
+
+      <!-- ===== ZONE E: 病虫害+视频监控区 (Right, x=1420-1760) ===== -->
+      <g class="zone-group" data-tip="病虫害+视频监控区|设备：虫情测报仪·孢子捕捉仪·PTZ摄像头·杀虫灯|AI识别Topic: iot/device/{id}/image">
+        <rect x="1420" y="580" width="340" height="230" rx="10" fill="rgba(255,77,79,0.05)" stroke="rgba(255,77,79,0.2)" stroke-width="1.5" stroke-dasharray="5 3"/>
+        <text x="1590" y="605" text-anchor="middle" fill="#ff4d4f" font-size="13" font-weight="600">📍 E区 - 病虫害/视频区</text>
+
+        <!-- Insect Trap -->
+        <rect x="1445" y="620" width="130" height="55" rx="6" fill="rgba(255,77,79,0.08)" stroke="#ff4d4f" stroke-width="1.5"/>
+        <text x="1510" y="640" text-anchor="middle" fill="#ff4d4f" font-size="11" font-weight="600">🦗 虫情测报仪</text>
+        <text x="1510" y="656" text-anchor="middle" fill="#aaa" font-size="9">自动诱虫·拍照</text>
+        <text x="1510" y="668" text-anchor="middle" fill="#aaa" font-size="9">AI识别计数</text>
+        <circle class="pulse-dot" cx="1555" cy="625" r="5" fill="#ff4d4f"/>
+
+        <!-- Spore Trap -->
+        <rect x="1590" y="620" width="130" height="55" rx="6" fill="rgba(168,85,247,0.08)" stroke="#a855f7" stroke-width="1.5"/>
+        <text x="1655" y="640" text-anchor="middle" fill="#a855f7" font-size="11" font-weight="600">🔬 孢子捕捉仪</text>
+        <text x="1655" y="656" text-anchor="middle" fill="#aaa" font-size="9">全天候采集</text>
+        <text x="1655" y="668" text-anchor="middle" fill="#aaa" font-size="9">显微成像</text>
+        <circle class="pulse-dot" cx="1700" cy="625" r="5" fill="#a855f7"/>
+
+        <!-- PTZ Camera -->
+        <rect x="1445" y="690" width="130" height="55" rx="6" fill="rgba(0,149,255,0.08)" stroke="#0095ff" stroke-width="1.5"/>
+        <text x="1510" y="710" text-anchor="middle" fill="#0095ff" font-size="11" font-weight="600">📹 PTZ摄像头</text>
+        <text x="1510" y="726" text-anchor="middle" fill="#aaa" font-size="9">8方向云台</text>
+        <text x="1510" y="738" text-anchor="middle" fill="#aaa" font-size="9">苗情·灾情</text>
+        <circle class="blink-rect" cx="1555" cy="695" r="4" fill="#0095ff"/>
+
+        <!-- Solar Lamp -->
+        <rect x="1590" y="690" width="130" height="55" rx="6" fill="rgba(255,213,79,0.08)" stroke="#FFD54F" stroke-width="1"/>
+        <text x="1655" y="710" text-anchor="middle" fill="#FFD54F" font-size="11" font-weight="600">💡 杀虫灯</text>
+        <text x="1655" y="726" text-anchor="middle" fill="#aaa" font-size="9">太阳能供电</text>
+        <text x="1655" y="738" text-anchor="middle" fill="#aaa" font-size="9">光控+时控</text>
+
+        <text x="1590" y="755" text-anchor="middle" fill="#ff4d4f" font-size="10" opacity="0.7">↑ 图片/计数数据→AI引擎</text>
+        <text x="1590" y="770" text-anchor="middle" fill="#ff9500" font-size="10" opacity="0.7">↓ 告警→云台转向→录像</text>
+
+        <path class="flow-line" d="M 1510,580 L 1510,350" stroke="#ff4d4f" stroke-width="2" marker-end="url(#arrow-red)" opacity="0.5"/>
+        <path class="flow-line" d="M 1655,350 L 1655,580" stroke="#ff9500" stroke-width="2" marker-end="url(#arrow-orange)" opacity="0.5"/>
+      </g>
+
+      <!-- ===== ZONE F: 能源管理区 (Bottom, y=830-1060) ===== -->
+      <g class="zone-group" data-tip="能源管理区|设备：电表/水表/燃气表·碳排放监测|能耗Topic: iot/device/{id}/energy">
+        <rect x="40" y="830" width="1720" height="100" rx="10" fill="rgba(255,149,0,0.04)" stroke="rgba(255,149,0,0.12)" stroke-width="1.5" stroke-dasharray="5 3"/>
+        <text x="900" y="855" text-anchor="middle" fill="#ff9500" font-size="13" font-weight="600">📍 F区 - 能源管理区 (全园覆盖)</text>
+
+        <!-- Electricity Meters -->
+        <rect x="100" y="865" width="150" height="50" rx="6" fill="rgba(255,149,0,0.06)" stroke="#ff9500" stroke-width="1"/>
+        <text x="175" y="885" text-anchor="middle" fill="#ff9500" font-size="12" font-weight="600">⚡ 智能电表</text>
+        <text x="175" y="900" text-anchor="middle" fill="#aaa" font-size="9">温室A/B/C/D 回路</text>
+        <circle class="pulse-dot" cx="225" cy="870" r="4" fill="#ff9500"/>
+
+        <!-- Water Meters -->
+        <rect x="280" y="865" width="150" height="50" rx="6" fill="rgba(0,149,255,0.06)" stroke="#0095ff" stroke-width="1"/>
+        <text x="355" y="885" text-anchor="middle" fill="#0095ff" font-size="12" font-weight="600">💧 智能水表</text>
+        <text x="355" y="900" text-anchor="middle" fill="#aaa" font-size="9">灌溉/生活 回路</text>
+
+        <!-- Gas Meters -->
+        <rect x="460" y="865" width="150" height="50" rx="6" fill="rgba(255,149,0,0.06)" stroke="#ff9500" stroke-width="1"/>
+        <text x="535" y="885" text-anchor="middle" fill="#ff9500" font-size="12" font-weight="600">🔥 燃气表</text>
+        <text x="535" y="900" text-anchor="middle" fill="#aaa" font-size="9">采暖设备</text>
+
+        <!-- Carbon Emission -->
+        <rect x="640" y="865" width="200" height="50" rx="6" fill="rgba(82,196,26,0.06)" stroke="#52c41a" stroke-width="1"/>
+        <text x="740" y="885" text-anchor="middle" fill="#52c41a" font-size="12" font-weight="600">🌱 碳排放监测</text>
+        <text x="740" y="900" text-anchor="middle" fill="#aaa" font-size="9">Scope1+Scope2 核算</text>
+
+        <!-- Load Dispatch -->
+        <rect x="870" y="865" width="200" height="50" rx="6" fill="rgba(255,149,0,0.06)" stroke="#ff9500" stroke-width="1"/>
+        <text x="970" y="885" text-anchor="middle" fill="#ff9500" font-size="12" font-weight="600">📊 负荷调度</text>
+        <text x="970" y="900" text-anchor="middle" fill="#aaa" font-size="9">峰谷平·需求响应</text>
+
+        <!-- Peak/Valley -->
+        <rect x="1100" y="865" width="200" height="50" rx="6" fill="rgba(255,149,0,0.06)" stroke="#ff9500" stroke-width="1"/>
+        <text x="1200" y="885" text-anchor="middle" fill="#ff9500" font-size="12" font-weight="600">📈 峰谷平分析</text>
+        <text x="1200" y="900" text-anchor="middle" fill="#aaa" font-size="9">峰1.0/平0.6/谷0.3元</text>
+
+        <!-- Energy Report -->
+        <rect x="1330" y="865" width="200" height="50" rx="6" fill="rgba(168,85,247,0.06)" stroke="#a855f7" stroke-width="1"/>
+        <text x="1430" y="885" text-anchor="middle" fill="#a855f7" font-size="12" font-weight="600">📋 能耗报表</text>
+        <text x="1430" y="900" text-anchor="middle" fill="#aaa" font-size="9">日/月/年 导出</text>
+
+        <!-- Carbon Report -->
+        <rect x="1560" y="865" width="180" height="50" rx="6" fill="rgba(82,196,26,0.06)" stroke="#52c41a" stroke-width="1"/>
+        <text x="1650" y="885" text-anchor="middle" fill="#52c41a" font-size="12" font-weight="600">📄 碳排报告</text>
+        <text x="1650" y="900" text-anchor="middle" fill="#aaa" font-size="9">月度自动生成</text>
+
+        <path class="flow-line" d="M 175,830 L 175,350" stroke="#ff9500" stroke-width="1.5" marker-end="url(#arrow-orange)" opacity="0.3"/>
+        <path class="flow-line" d="M 535,830 L 535,350" stroke="#ff9500" stroke-width="1.5" marker-end="url(#arrow-orange)" opacity="0.3"/>
+        <path class="flow-line" d="M 970,830 L 970,350" stroke="#ff9500" stroke-width="1.5" marker-end="url(#arrow-orange)" opacity="0.3"/>
+      </g>
+
+      <!-- ===== Network Layer Indicators (between zones and farm) ===== -->
+      <g class="network-labels">
+        <text x="210" y="555" text-anchor="middle" fill="#409eff" font-size="10" opacity="0.6">LoRa</text>
+        <text x="560" y="555" text-anchor="middle" fill="#409eff" font-size="10" opacity="0.6">WiFi/MQTT</text>
+        <text x="900" y="555" text-anchor="middle" fill="#409eff" font-size="10" opacity="0.6">NB-IoT</text>
+        <text x="1240" y="555" text-anchor="middle" fill="#409eff" font-size="10" opacity="0.6">4G/5G</text>
+        <text x="1590" y="555" text-anchor="middle" fill="#409eff" font-size="10" opacity="0.6">4G+MQTT</text>
+
+        <!-- Network layer band -->
+        <rect x="20" y="565" width="1760" height="12" rx="6" fill="rgba(64,158,255,0.06)" stroke="rgba(64,158,255,0.1)" stroke-width="0.5"/>
+        <text x="900" y="575" text-anchor="middle" fill="#409eff" font-size="9" opacity="0.5">📡 网络传输层 (LoRa · WiFi · NB-IoT · 4G/5G · MQTT · Modbus)</text>
+      </g>
+
+      <!-- ===== Cross-zone data flow (horizontal connections) ===== -->
+      <!-- A→B: weather data feeds greenhouse control -->
+      <path class="flow-line" d="M 380,700 L 400,700" stroke="#52c41a" stroke-width="2" marker-end="url(#arrow-green)" opacity="0.5"/>
+      <text x="390" y="693" text-anchor="middle" fill="#52c41a" font-size="8" opacity="0.6">气象联动</text>
+
+      <!-- B→C: greenhouse irrigation connects to field -->
+      <path class="flow-line" d="M 720,700 L 740,700" stroke="#0095ff" stroke-width="2" marker-end="url(#arrow-blue)" opacity="0.5"/>
+      <text x="730" y="693" text-anchor="middle" fill="#0095ff" font-size="8" opacity="0.6">灌溉联动</text>
+
+      <!-- C→D: field soil data triggers irrigation -->
+      <path class="flow-line" d="M 1060,700 L 1080,700" stroke="#0095ff" stroke-width="2" marker-end="url(#arrow-blue)" opacity="0.5"/>
+      <text x="1070" y="693" text-anchor="middle" fill="#0095ff" font-size="8" opacity="0.6">土壤联动</text>
+
+      <!-- D→E: water system + pest monitoring -->
+      <path class="flow-line" d="M 1400,700 L 1420,700" stroke="#ff4d4f" stroke-width="2" marker-end="url(#arrow-red)" opacity="0.5"/>
+      <text x="1410" y="693" text-anchor="middle" fill="#ff4d4f" font-size="8" opacity="0.6">环境联动</text>
+
+      <!-- ===== Rule Engine Linkage (cross-zone) ===== -->
+      <!-- Rule engine → Zone B (auto control greenhouse based on weather) -->
+      <path class="flow-line" d="M 620,110 Q 620,500 560,580" stroke="#00ff88" stroke-width="1.5" stroke-dasharray="3 5" opacity="0.3"/>
+      <text x="640" y="300" fill="#00ff88" font-size="9" opacity="0.5">规则: 温度>35℃→开风机+卷帘</text>
+
+      <!-- Rule engine → Zone C (auto irrigation based on soil moisture) -->
+      <path class="flow-line" d="M 620,110 Q 800,400 830,580" stroke="#00ff88" stroke-width="1.5" stroke-dasharray="3 5" opacity="0.3"/>
+      <text x="760" y="420" fill="#00ff88" font-size="9" opacity="0.5">规则: 土壤水分<20%→开灌溉阀</text>
+
+      <!-- Rule engine → Zone D (load dispatch based on energy) -->
+      <path class="flow-line" d="M 620,110 Q 900,300 1170,580" stroke="#00ff88" stroke-width="1.5" stroke-dasharray="3 5" opacity="0.3"/>
+      <text x="900" y="250" fill="#00ff88" font-size="9" opacity="0.5">规则: 峰段→限功率+空调调温</text>
+
+      <!-- Rule engine → Zone E (alarm on pest detection) -->
+      <path class="flow-line" d="M 620,110 Q 1100,200 1510,580" stroke="#ff4d4f" stroke-width="1.5" stroke-dasharray="3 5" opacity="0.3"/>
+      <text x="1100" y="170" fill="#ff4d4f" font-size="9" opacity="0.5">规则: 虫害>阈值→告警+短信</text>
+
+      <!-- ===== AI Engine Linkage ===== -->
+      <path class="flow-line" d="M 780,110 Q 1200,300 1655,580" stroke="#a855f7" stroke-width="1.5" stroke-dasharray="3 5" opacity="0.3"/>
+      <text x="1200" y="300" fill="#a855f7" font-size="9" opacity="0.5">AI: 虫情图片→识别→种类统计</text>
+
+      <!-- ===== Alarm linkage to presentation ===== -->
+      <path class="flow-line" d="M 1050,420 Q 1050,400 1050,350" stroke="#ff4d4f" stroke-width="1.5" marker-end="url(#arrow-red)" opacity="0.4"/>
+      <text x="1065" y="385" fill="#ff4d4f" font-size="8" opacity="0.5">告警推送</text>
+
+    </svg>
+  </div>
+
+  <!-- Legend -->
+  <div class="legend-bar">
+    <div class="lg-item"><div class="lg-dot" style="background:#52c41a"></div>感知层·传感器(数据上报)</div>
+    <div class="lg-item"><div class="lg-dot" style="background:#0095ff"></div>执行器·控制器(指令下发)</div>
+    <div class="lg-item"><div class="lg-dot" style="background:#00ff88"></div>平台层·规则引擎(联动决策)</div>
+    <div class="lg-item"><div class="lg-dot" style="background:#ff9500"></div>应用层·业务模块(数据处理)</div>
+    <div class="lg-item"><div class="lg-dot" style="background:#a855f7"></div>展示层·AI引擎(智能分析)</div>
+    <div class="lg-item"><div class="lg-dot" style="background:#ff4d4f"></div>告警流·异常联动</div>
+    <div class="lg-item"><div class="lg-dot" style="background:#409eff"></div>网络层·通信协议</div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="st"><div class="n">7</div><div class="l">架构层级</div></div>
+    <div class="st"><div class="n">6</div><div class="l">功能区域</div></div>
+    <div class="st"><div class="n">18+</div><div class="l">业务模块</div></div>
+    <div class="st"><div class="n">30+</div><div class="l">设备类型</div></div>
+    <div class="st"><div class="n">5</div><div class="l">通信协议</div></div>
+    <div class="st"><div class="n">8+</div><div class="l">联动规则</div></div>
+  </div>
+
+</div>
+
+<!-- Tooltip -->
+<div class="tooltip" id="tooltip">
+  <div class="tt-title" id="ttTitle"></div>
+  <div class="tt-row" id="ttDesc"></div>
+</div>
+
+<script>
+(function() {
+  const tooltip = document.getElementById('tooltip');
+  const ttTitle = document.getElementById('ttTitle');
+  const ttDesc = document.getElementById('ttDesc');
+
+  document.querySelectorAll('.zone-group').forEach(el => {
+    el.addEventListener('mouseenter', function(e) {
+      const tip = this.getAttribute('data-tip');
+      if (!tip) return;
+      const parts = tip.split('|');
+      ttTitle.textContent = parts[0] || '';
+      ttDesc.textContent = parts.slice(1).join(' · ') || '';
+      tooltip.classList.add('show');
+    });
+    el.addEventListener('mousemove', function(e) {
+      tooltip.style.left = (e.clientX + 15) + 'px';
+      tooltip.style.top = (e.clientY + 15) + 'px';
+    });
+    el.addEventListener('mouseleave', function() {
+      tooltip.classList.remove('show');
+    });
+  });
+})();
+</script>
+</body>
+</html>

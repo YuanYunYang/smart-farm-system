@@ -25,6 +25,9 @@ public class IrrigationRule implements Serializable {
     @TableId(type = IdType.AUTO)
     private Long id;
 
+    /** 租户ID（多租户隔离） */
+    private Long tenantId;
+
     /** 农场ID */
     private Long farmId;
 

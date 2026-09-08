@@ -1,0 +1,1932 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智慧农业大数据平台</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <style>
+        /* ============ 基础重置与变量 ============ */
+        :root {
+            --bg-deep: #0a1628;
+            --bg-mid: #0f1f3a;
+            --cyan: #00d4ff;
+            --green: #00ff88;
+            --orange: #ff9500;
+            --red: #ff4d4f;
+            --purple: #a855f7;
+            --text-main: #ffffff;
+            --text-dim: rgba(255, 255, 255, 0.6);
+            --panel-bg: rgba(10, 22, 40, 0.8);
+            --panel-border: rgba(0, 212, 255, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            font-family: "Microsoft YaHei", "微软雅黑", sans-serif;
+            background: linear-gradient(135deg, var(--bg-deep) 0%, var(--bg-mid) 100%);
+            color: var(--text-main);
+            user-select: none;
+        }
+
+        /* 扫描线全局效果 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent 0px,
+                transparent 2px,
+                rgba(0, 212, 255, 0.015) 3px,
+                rgba(0, 212, 255, 0.015) 3px
+            );
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        /* 移动扫描线动画 */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.4), transparent);
+            animation: scanline 8s linear infinite;
+            pointer-events: none;
+            z-index: 9998;
+        }
+
+        @keyframes scanline {
+            0% { top: 0; }
+            100% { top: 100vh; }
+        }
+
+        /* ============ 主布局 ============ */
+        .main-container {
+            width: 100vw;
+            height: 100vh;
+            display: grid;
+            grid-template-rows: 70px 1fr 50px;
+            gap: 8px;
+            padding: 8px;
+        }
+
+        /* ============ 通用面板样式 ============ */
+        .panel {
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: 4px;
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.1), inset 0 0 30px rgba(0, 212, 255, 0.03);
+            position: relative;
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* 四角科技感边框 */
+        .panel::before,
+        .panel::after {
+            content: '';
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-color: var(--cyan);
+            border-style: solid;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .panel::before {
+            top: 0;
+            left: 0;
+            border-width: 1px 0 0 1px;
+        }
+
+        .panel::after {
+            bottom: 0;
+            right: 0;
+            border-width: 0 1px 1px 0;
+        }
+
+        /* 额外的两个角 */
+        .panel .corner-tr,
+        .panel .corner-bl {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-color: var(--cyan);
+            border-style: solid;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .panel .corner-tr {
+            top: 0;
+            right: 0;
+            border-width: 1px 1px 0 0;
+        }
+
+        .panel .corner-bl {
+            bottom: 0;
+            left: 0;
+            border-width: 0 0 1px 1px;
+        }
+
+        .panel-title {
+            display: flex;
+            align-items: center;
+            padding: 6px 14px;
+            font-size: 15px;
+            font-weight: bold;
+            color: var(--cyan);
+            border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+            background: linear-gradient(90deg, rgba(0, 212, 255, 0.1), transparent);
+            flex-shrink: 0;
+            letter-spacing: 1px;
+        }
+
+        .panel-title::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 14px;
+            background: var(--cyan);
+            margin-right: 8px;
+            box-shadow: 0 0 8px var(--cyan);
+            border-radius: 1px;
+        }
+
+        .panel-body {
+            flex: 1;
+            padding: 8px 12px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .glow-text {
+            text-shadow: 0 0 10px currentColor;
+        }
+
+        /* ============ Header ============ */
+        .header {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            padding: 0 20px;
+            background: linear-gradient(180deg, rgba(0, 212, 255, 0.12), transparent);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 4px;
+            position: relative;
+            backdrop-filter: blur(10px);
+        }
+
+        .header::before,
+        .header::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-color: var(--cyan);
+            border-style: solid;
+        }
+
+        .header::before {
+            top: 0; left: 0;
+            border-width: 1px 0 0 1px;
+        }
+
+        .header::after {
+            bottom: 0; right: 0;
+            border-width: 0 1px 1px 0;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-logo {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--green), var(--cyan));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
+            animation: logoPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes logoPulse {
+            0%, 100% { box-shadow: 0 0 15px rgba(0, 255, 136, 0.5); }
+            50% { box-shadow: 0 0 25px rgba(0, 255, 136, 0.8); }
+        }
+
+        .header-title {
+            font-size: 26px;
+            font-weight: bold;
+            background: linear-gradient(90deg, var(--green), var(--cyan), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 3px;
+            filter: drop-shadow(0 0 10px rgba(0, 212, 255, 0.5));
+        }
+
+        .header-center {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .header-clock {
+            font-size: 22px;
+            color: var(--cyan);
+            text-shadow: 0 0 10px var(--cyan);
+            font-family: "Consolas", monospace;
+            letter-spacing: 2px;
+        }
+
+        .header-clock .date-part {
+            font-size: 14px;
+            color: var(--text-dim);
+            margin-right: 10px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 15px;
+        }
+
+        .weather-summary {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--text-dim);
+        }
+
+        .weather-summary .weather-icon {
+            font-size: 22px;
+        }
+
+        .weather-summary .temp {
+            color: var(--orange);
+            font-size: 18px;
+            font-weight: bold;
+            text-shadow: 0 0 8px var(--orange);
+        }
+
+        .header-btn {
+            padding: 6px 16px;
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.4);
+            border-radius: 4px;
+            color: var(--cyan);
+            cursor: pointer;
+            font-size: 13px;
+            font-family: inherit;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            text-decoration: none;
+        }
+
+        .header-btn:hover {
+            background: rgba(0, 212, 255, 0.2);
+            box-shadow: 0 0 12px rgba(0, 212, 255, 0.4);
+        }
+
+        .header-btn.active {
+            background: rgba(0, 255, 136, 0.15);
+            border-color: var(--green);
+            color: var(--green);
+            box-shadow: 0 0 12px rgba(0, 255, 136, 0.3);
+        }
+
+        /* ============ 三列布局 ============ */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 25% 50% 25%;
+            gap: 8px;
+            overflow: hidden;
+        }
+
+        .col {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            overflow: hidden;
+        }
+
+        /* ============ 左列：气象仪表 ============ */
+        .gauges-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            height: 100%;
+        }
+
+        .gauge-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .gauge-ring {
+            position: relative;
+            width: 70px;
+            height: 70px;
+        }
+
+        .gauge-ring svg {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+
+        .gauge-ring .track {
+            fill: none;
+            stroke: rgba(0, 212, 255, 0.1);
+            stroke-width: 4;
+        }
+
+        .gauge-ring .progress {
+            fill: none;
+            stroke-width: 4;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.8s ease;
+            filter: drop-shadow(0 0 4px currentColor);
+        }
+
+        .gauge-value {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .gauge-value .num {
+            font-size: 16px;
+            font-weight: bold;
+            line-height: 1;
+        }
+
+        .gauge-value .unit {
+            font-size: 9px;
+            color: var(--text-dim);
+        }
+
+        .gauge-label {
+            font-size: 11px;
+            color: var(--text-dim);
+            margin-top: 4px;
+            text-align: center;
+        }
+
+        /* ============ 左列：土壤参数条 ============ */
+        .soil-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            justify-content: center;
+            height: 100%;
+        }
+
+        .soil-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .soil-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+        }
+
+        .soil-item-header .label {
+            color: var(--text-dim);
+        }
+
+        .soil-item-header .val {
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        .soil-bar-bg {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .soil-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.8s ease;
+            position: relative;
+        }
+
+        .soil-bar-fill::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: barShine 2s linear infinite;
+        }
+
+        @keyframes barShine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* ============ 左列：灌溉统计 ============ */
+        .irrigation-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto 1fr;
+            gap: 8px;
+            height: 100%;
+        }
+
+        .irrig-big {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 8px 0;
+        }
+
+        .irrig-big .num {
+            font-size: 32px;
+            font-weight: bold;
+            color: var(--cyan);
+            text-shadow: 0 0 12px var(--cyan);
+            line-height: 1;
+        }
+
+        .irrig-big .label {
+            font-size: 11px;
+            color: var(--text-dim);
+            margin-top: 4px;
+        }
+
+        .irrig-stat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .irrig-stat .circle-progress {
+            position: relative;
+            width: 55px;
+            height: 55px;
+        }
+
+        .irrig-stat .circle-progress svg {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+
+        .irrig-stat .circle-num {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .irrig-stat .stat-label {
+            font-size: 10px;
+            color: var(--text-dim);
+        }
+
+        /* ============ 中列：农场地图 ============ */
+        .farm-map-container {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .farm-map {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            grid-template-rows: repeat(6, 1fr);
+            gap: 3px;
+            padding: 4px;
+            position: relative;
+        }
+
+        .map-cell {
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.8);
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .map-cell.greenhouse {
+            background: rgba(0, 255, 136, 0.15);
+            border: 1px solid rgba(0, 255, 136, 0.4);
+        }
+
+        .map-cell.fishpond {
+            background: rgba(0, 212, 255, 0.15);
+            border: 1px solid rgba(0, 212, 255, 0.4);
+        }
+
+        .map-cell.outdoor {
+            background: rgba(255, 149, 0, 0.1);
+            border: 1px solid rgba(255, 149, 0, 0.3);
+        }
+
+        .map-cell.building {
+            background: rgba(168, 85, 247, 0.15);
+            border: 1px solid rgba(168, 85, 247, 0.4);
+        }
+
+        .map-cell.path {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px dashed rgba(255, 255, 255, 0.1);
+        }
+
+        .device-marker {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            animation: markerPulse 2s ease-in-out infinite;
+        }
+
+        .device-marker.green {
+            background: var(--green);
+            box-shadow: 0 0 8px var(--green);
+        }
+
+        .device-marker.cyan {
+            background: var(--cyan);
+            box-shadow: 0 0 8px var(--cyan);
+        }
+
+        .device-marker.orange {
+            background: var(--orange);
+            box-shadow: 0 0 8px var(--orange);
+        }
+
+        .device-marker.red {
+            background: var(--red);
+            box-shadow: 0 0 8px var(--red);
+        }
+
+        @keyframes markerPulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.6);
+                opacity: 0.5;
+            }
+        }
+
+        .map-legend {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            padding: 4px 0 2px;
+            font-size: 10px;
+            color: var(--text-dim);
+            flex-shrink: 0;
+        }
+
+        .map-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .map-legend-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 2px;
+        }
+
+        /* ============ 中列：趋势图 & 生产统计 ============ */
+        .chart-container {
+            height: 100%;
+            position: relative;
+        }
+
+        .chart-container canvas {
+            max-height: 100%;
+        }
+
+        .kpi-row {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 6px;
+            height: 100%;
+            align-items: center;
+        }
+
+        .kpi-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            padding: 4px;
+            border: 1px solid rgba(0, 212, 255, 0.15);
+            border-radius: 4px;
+            background: rgba(0, 212, 255, 0.03);
+            transition: all 0.3s;
+        }
+
+        .kpi-item:hover {
+            border-color: rgba(0, 212, 255, 0.5);
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
+        }
+
+        .kpi-icon {
+            font-size: 20px;
+        }
+
+        .kpi-num {
+            font-size: 26px;
+            font-weight: bold;
+            line-height: 1;
+        }
+
+        .kpi-label {
+            font-size: 10px;
+            color: var(--text-dim);
+        }
+
+        /* ============ 右列：告警列表 ============ */
+        .alarm-list {
+            height: 100%;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .alarm-scroll {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            animation: scrollUp 20s linear infinite;
+        }
+
+        .alarm-list:hover .alarm-scroll {
+            animation-play-state: paused;
+        }
+
+        @keyframes scrollUp {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-50%); }
+        }
+
+        .alarm-item {
+            display: grid;
+            grid-template-columns: 55px 24px 1fr auto;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 8px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 3px;
+            border-left: 3px solid;
+            font-size: 11px;
+            transition: all 0.3s;
+        }
+
+        .alarm-item:hover {
+            background: rgba(0, 212, 255, 0.08);
+        }
+
+        .alarm-item.red { border-left-color: var(--red); }
+        .alarm-item.yellow { border-left-color: var(--orange); }
+        .alarm-item.green { border-left-color: var(--green); }
+
+        .alarm-time {
+            color: var(--text-dim);
+            font-size: 10px;
+            font-family: "Consolas", monospace;
+        }
+
+        .alarm-icon {
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .alarm-desc {
+            color: rgba(255, 255, 255, 0.85);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .alarm-level {
+            font-size: 9px;
+            padding: 1px 6px;
+            border-radius: 2px;
+        }
+
+        .alarm-level.red { background: rgba(255, 77, 79, 0.2); color: var(--red); }
+        .alarm-level.yellow { background: rgba(255, 149, 0, 0.2); color: var(--orange); }
+        .alarm-level.green { background: rgba(0, 255, 136, 0.2); color: var(--green); }
+
+        /* ============ 右列：设备状态 & 虫情 ============ */
+        .device-status-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            height: 100%;
+            align-items: center;
+        }
+
+        .device-chart-wrap {
+            height: 100%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .device-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .device-stat-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+        }
+
+        .device-stat-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .device-stat-dot.online { background: var(--green); box-shadow: 0 0 6px var(--green); }
+        .device-stat-dot.offline { background: var(--text-dim); }
+        .device-stat-dot.alarm { background: var(--red); box-shadow: 0 0 6px var(--red); }
+
+        .device-stat-num {
+            font-weight: bold;
+            font-size: 16px;
+            margin-left: auto;
+        }
+
+        .pest-content {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .pest-chart-wrap {
+            flex: 1;
+            position: relative;
+        }
+
+        .spore-risk {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 4px 8px;
+            background: rgba(255, 77, 79, 0.1);
+            border: 1px solid rgba(255, 77, 79, 0.3);
+            border-radius: 3px;
+            font-size: 11px;
+            flex-shrink: 0;
+        }
+
+        .spore-risk .risk-level {
+            color: var(--red);
+            font-weight: bold;
+            text-shadow: 0 0 6px var(--red);
+            animation: riskBlink 1.5s ease-in-out infinite;
+        }
+
+        @keyframes riskBlink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* ============ Footer ============ */
+        .footer {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            align-items: center;
+            background: rgba(10, 22, 40, 0.8);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 4px;
+            padding: 0 16px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .footer::before,
+        .footer::after {
+            content: '';
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-color: var(--cyan);
+            border-style: solid;
+        }
+
+        .footer::before {
+            top: 0; left: 0;
+            border-width: 1px 0 0 1px;
+        }
+
+        .footer::after {
+            bottom: 0; right: 0;
+            border-width: 0 1px 1px 0;
+        }
+
+        .ticker {
+            overflow: hidden;
+            white-space: nowrap;
+            font-size: 13px;
+            color: var(--text-dim);
+        }
+
+        .ticker-content {
+            display: inline-block;
+            animation: tickerScroll 30s linear infinite;
+            padding-left: 100%;
+        }
+
+        .ticker-content span {
+            color: var(--cyan);
+            margin: 0 6px;
+        }
+
+        @keyframes tickerScroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-100%); }
+        }
+
+        .footer-btn {
+            padding: 6px 18px;
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.4);
+            border-radius: 4px;
+            color: var(--green);
+            cursor: pointer;
+            font-size: 13px;
+            font-family: inherit;
+            text-decoration: none;
+            transition: all 0.3s;
+            white-space: nowrap;
+            margin-left: 16px;
+        }
+
+        .footer-btn:hover {
+            background: rgba(0, 255, 136, 0.2);
+            box-shadow: 0 0 12px rgba(0, 255, 136, 0.4);
+        }
+
+        /* ============ 自动轮显切换 ============ */
+        .rotation-view {
+            display: none;
+            flex: 1;
+            flex-direction: column;
+        }
+
+        .rotation-view.active {
+            display: flex;
+            animation: fadeIn 0.6s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.98); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .center-panel-switcher {
+            display: none;
+        }
+
+        /* 轮显模式下的指示器 */
+        .rotation-indicators {
+            position: absolute;
+            bottom: 4px;
+            right: 10px;
+            display: flex;
+            gap: 4px;
+            z-index: 3;
+        }
+
+        .rotation-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(0, 212, 255, 0.2);
+            transition: all 0.3s;
+        }
+
+        .rotation-dot.active {
+            background: var(--cyan);
+            box-shadow: 0 0 6px var(--cyan);
+            width: 18px;
+            border-radius: 3px;
+        }
+
+        /* 滚动条隐藏 */
+        ::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <!-- ============ Header ============ -->
+        <div class="header">
+            <div class="header-left">
+                <div class="header-logo">🌾</div>
+                <div class="header-title glow-text">智慧农业大数据平台</div>
+            </div>
+            <div class="header-center">
+                <div class="header-clock">
+                    <span class="date-part" id="header-date"></span>
+                    <span id="header-time"></span>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="weather-summary">
+                    <span class="weather-icon" id="weather-icon">☀️</span>
+                    <span class="temp" id="weather-temp">28°C</span>
+                    <span id="weather-humidity">湿度65%</span>
+                </div>
+                <button class="header-btn" id="rotation-toggle">
+                    <span>🔄</span> 自动轮显
+                </button>
+                <a href="index.html" class="header-btn">
+                    <span>⬅</span> 返回
+                </a>
+            </div>
+        </div>
+
+        <!-- ============ Content Grid ============ -->
+        <div class="content-grid">
+            <!-- ===== LEFT COLUMN ===== -->
+            <div class="col">
+                <!-- 气象实时监测 -->
+                <div class="panel" style="flex: 1.3;">
+                    <span class="corner-tr"></span><span class="corner-bl"></span>
+                    <div class="panel-title">气象实时监测</div>
+                    <div class="panel-body">
+                        <div class="gauges-grid" id="gauges-grid">
+                            <!-- 由JS生成 -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 土壤墒情数据 -->
+                <div class="panel" style="flex: 1;">
+                    <span class="corner-tr"></span><span class="corner-bl"></span>
+                    <div class="panel-title">土壤墒情数据</div>
+                    <div class="panel-body">
+                        <div class="soil-list" id="soil-list">
+                            <!-- 由JS生成 -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 灌溉统计 -->
+                <div class="panel" style="flex: 1.1;">
+                    <span class="corner-tr"></span><span class="corner-bl"></span>
+                    <div class="panel-title">灌溉统计</div>
+                    <div class="panel-body">
+                        <div class="irrigation-content">
+                            <div class="irrig-big">
+                                <div class="num" id="irrig-water">2,856</div>
+                                <div class="label">今日用水量 (m³)</div>
+                            </div>
+                            <div class="irrig-stat">
+                                <div class="circle-progress">
+                                    <svg viewBox="0 0 60 60">
+                                        <circle cx="30" cy="30" r="25" fill="none" stroke="rgba(0,212,255,0.1)" stroke-width="4"/>
+                                        <circle id="irrig-events-circle" cx="30" cy="30" r="25" fill="none" stroke="#00ff88" stroke-width="4" stroke-linecap="round" stroke-dasharray="157" stroke-dashoffset="47" style="filter: drop-shadow(0 0 4px #00ff88);"/>
+                                    </svg>
+                                    <div class="circle-num" id="irrig-events-num" style="color:#00ff88;">18</div>
+                                </div>
+                                <div class="stat-label">灌溉次数</div>
+                            </div>
+                            <div class="irrig-stat">
+                                <div class="circle-progress">
+                                    <svg viewBox="0 0 60 60">
+                                        <circle cx="30" cy="30" r="25" fill="none" stroke="rgba(0,212,255,0.1)" stroke-width="4"/>
+                                        <circle id="irrig-saving-circle" cx="30" cy="30" r="25" fill="none" stroke="#ff9500" stroke-width="4" stroke-linecap="round" stroke-dasharray="157" stroke-dashoffset="39" style="filter: drop-shadow(0 0 4px #ff9500);"/>
+                                    </svg>
+                                    <div class="circle-num" id="irrig-saving-num" style="color:#ff9500;">75%</div>
+                                </div>
+                                <div class="stat-label">节水率</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== CENTER COLUMN ===== -->
+            <div class="col">
+                <!-- 顶部：农场地图 / 自动轮显容器 -->
+                <div class="panel" id="center-top-panel" style="flex: 1.2;">
+                    <span class="corner-tr"></span><span class="corner-bl"></span>
+                    <div class="panel-title" id="center-top-title">农场分布图</div>
+                    <div class="panel-body" style="position: relative;">
+                        <!-- 视图1：农场地图 -->
+                        <div class="rotation-view active" id="view-map">
+                            <div class="farm-map-container">
+                                <div class="farm-map" id="farm-map">
+                                    <!-- 由JS生成 -->
+                                </div>
+                                <div class="map-legend">
+                                    <div class="map-legend-item"><div class="map-legend-dot" style="background: rgba(0,255,136,0.4);"></div>温室</div>
+                                    <div class="map-legend-item"><div class="map-legend-dot" style="background: rgba(0,212,255,0.4);"></div>鱼塘</div>
+                                    <div class="map-legend-item"><div class="map-legend-dot" style="background: rgba(255,149,0,0.3);"></div>大田</div>
+                                    <div class="map-legend-item"><div class="map-legend-dot" style="background: rgba(168,85,247,0.4);"></div>建筑</div>
+                                    <div class="map-legend-item"><div class="map-legend-dot" style="background: #00ff88; box-shadow: 0 0 4px #00ff88;"></div>设备(在线)</div>
+                                    <div class="map-legend-item"><div class="map-legend-dot" style="background: #ff4d4f; box-shadow: 0 0 4px #ff4d4f;"></div>设备(告警)</div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 视图2：实时数据趋势 -->
+                        <div class="rotation-view" id="view-trend">
+                            <div class="chart-container">
+                                <canvas id="trend-chart"></canvas>
+                            </div>
+                        </div>
+                        <!-- 视图3：生产统计 -->
+                        <div class="rotation-view" id="view-kpi">
+                            <div class="kpi-row" id="kpi-row">
+                                <!-- 由JS生成 -->
+                            </div>
+                        </div>
+                        <!-- 视图4：灌溉状态 -->
+                        <div class="rotation-view" id="view-irrigation">
+                            <div class="chart-container">
+                                <canvas id="irrigation-chart"></canvas>
+                            </div>
+                        </div>
+                        <!-- 轮显指示器 -->
+                        <div class="rotation-indicators" id="rotation-indicators" style="display:none;">
+                            <div class="rotation-dot active"></div>
+                            <div class="rotation-dot"></div>
+                            <div class="rotation-dot"></div>
+                            <div class="rotation-dot"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 中部：实时数据趋势（常态显示） -->
+                <div class="panel" id="center-mid-panel" style="flex: 1.3;">
+                    <span class="corner-tr"></span><span class="corner-bl"></span>
+                    <div class="panel-title">实时数据趋势</div>
+                    <div class="panel-body">
+                        <div class="chart-container">
+                            <canvas id="trend-chart-main"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 底部：生产统计 -->
+                <div class="panel" id="center-bot-panel" style="flex: 0.9;">
+                    <span class="corner-tr"></span><span class="corner-bl"></span>
+                    <div class="panel-title">生产统计</div>
+                    <div class="panel-body">
+                        <div class="kpi-row" id="kpi-row-main">
+                            <!-- 由JS生成 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== RIGHT COLUMN ===== -->
+            <div class="col">
+                <!-- 实时告警列表 -->
+                <div class="panel" style="flex: 1.3;">
+                    <span class="corner-tr"></span><span class="corner-bl"></span>
+                    <div class="panel-title">实时告警列表</div>
+                    <div class="panel-body">
+                        <div class="alarm-list" id="alarm-list">
+                            <div class="alarm-scroll" id="alarm-scroll">
+                                <!-- 由JS生成 -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 设备状态分布 -->
+                <div class="panel" style="flex: 1.2;">
+                    <span class="corner-tr"></span><span class="corner-bl"></span>
+                    <div class="panel-title">设备状态分布</div>
+                    <div class="panel-body">
+                        <div class="device-status-content">
+                            <div class="device-chart-wrap">
+                                <canvas id="device-chart"></canvas>
+                            </div>
+                            <div class="device-stats" id="device-stats">
+                                <!-- 由JS生成 -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 虫情/孢子预警 -->
+                <div class="panel" style="flex: 1.2;">
+                    <span class="corner-tr"></span><span class="corner-bl"></span>
+                    <div class="panel-title">虫情/孢子预警</div>
+                    <div class="panel-body">
+                        <div class="pest-content">
+                            <div class="pest-chart-wrap">
+                                <canvas id="pest-chart"></canvas>
+                            </div>
+                            <div class="spore-risk">
+                                <span>🍄 孢子风险等级</span>
+                                <span class="risk-level" id="spore-risk-level">高风险</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ Footer ============ -->
+        <div class="footer">
+            <div class="ticker">
+                <div class="ticker-content" id="ticker-content">
+                    欢迎使用智慧农业大数据平台 <span>|</span> 系统运行正常 <span>|</span> 今日采集数据3560条 <span>|</span> 在线设备342台 <span>|</span> 告警8条 <span>|</span> 数据更新中...
+                </div>
+            </div>
+            <a href="index.html" class="footer-btn">返回管理平台</a>
+        </div>
+    </div>
+
+    <script>
+    // ============================================================
+    //  全局配置与工具函数
+    // ============================================================
+    const COLORS = {
+        cyan: '#00d4ff',
+        green: '#00ff88',
+        orange: '#ff9500',
+        red: '#ff4d4f',
+        purple: '#a855f7',
+        white: '#ffffff',
+        dim: 'rgba(255,255,255,0.6)'
+    };
+
+    // 随机数生成
+    function rand(min, max, decimals = 1) {
+        const val = Math.random() * (max - min) + min;
+        return parseFloat(val.toFixed(decimals));
+    }
+
+    // 数字滚动动画
+    function animateNumber(el, target, duration = 800, suffix = '') {
+        const start = parseFloat(el.textContent.replace(/[^\d.-]/g, '')) || 0;
+        const startTime = performance.now();
+        const step = (now) => {
+            const progress = Math.min((now - startTime) / duration, 1);
+            const eased = 1 - Math.pow(1 - progress, 3);
+            const current = start + (target - start) * eased;
+            el.textContent = Math.round(current).toLocaleString() + suffix;
+            if (progress < 1) requestAnimationFrame(step);
+        };
+        requestAnimationFrame(step);
+    }
+
+    // ============================================================
+    //  实时时钟
+    // ============================================================
+    function updateClock() {
+        const now = new Date();
+        const y = now.getFullYear();
+        const m = String(now.getMonth() + 1).padStart(2, '0');
+        const d = String(now.getDate()).padStart(2, '0');
+        const h = String(now.getHours()).padStart(2, '0');
+        const mi = String(now.getMinutes()).padStart(2, '0');
+        const s = String(now.getSeconds()).padStart(2, '0');
+        const weekDays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+        document.getElementById('header-date').textContent = `${y}-${m}-${d} ${weekDays[now.getDay()]}`;
+        document.getElementById('header-time').textContent = `${h}:${mi}:${s}`;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // ============================================================
+    //  气象实时监测 - 6个圆形仪表
+    // ============================================================
+    const gaugeConfigs = [
+        { label: '温度', icon: '🌡️', unit: '°C', color: COLORS.orange, min: 0, max: 50, value: 28 },
+        { label: '湿度', icon: '💧', unit: '%', color: COLORS.cyan, min: 0, max: 100, value: 65 },
+        { label: '风速', icon: '🌬️', unit: 'm/s', color: COLORS.green, min: 0, max: 20, value: 5.2 },
+        { label: '雨量', icon: '🌧️', unit: 'mm', color: COLORS.purple, min: 0, max: 50, value: 2.5 },
+        { label: '气压', icon: '📊', unit: 'hPa', color: COLORS.cyan, min: 980, max: 1040, value: 1013 },
+        { label: 'CO2', icon: '🌫️', unit: 'ppm', color: COLORS.red, min: 300, max: 1000, value: 420 }
+    ];
+
+    function renderGauges() {
+        const grid = document.getElementById('gauges-grid');
+        grid.innerHTML = '';
+        gaugeConfigs.forEach((g, i) => {
+            const item = document.createElement('div');
+            item.className = 'gauge-item';
+            const circumference = 2 * Math.PI * 30; // r=30
+            const pct = (g.value - g.min) / (g.max - g.min);
+            const offset = circumference * (1 - pct);
+            item.innerHTML = `
+                <div class="gauge-ring">
+                    <svg viewBox="0 0 70 70">
+                        <circle class="track" cx="35" cy="35" r="30"/>
+                        <circle class="progress" cx="35" cy="35" r="30" stroke="${g.color}"
+                            stroke-dasharray="${circumference}" stroke-dashoffset="${offset}"
+                            id="gauge-${i}"/>
+                    </svg>
+                    <div class="gauge-value">
+                        <div class="num" style="color:${g.color};" id="gauge-val-${i}">${g.value}</div>
+                        <div class="unit">${g.unit}</div>
+                    </div>
+                </div>
+                <div class="gauge-label">${g.label}</div>
+            `;
+            grid.appendChild(item);
+        });
+    }
+
+    function updateGauges() {
+        gaugeConfigs.forEach((g, i) => {
+            g.value = rand(g.min, g.max, g.label === '气压' ? 0 : 1);
+            const circumference = 2 * Math.PI * 30;
+            const pct = (g.value - g.min) / (g.max - g.min);
+            const offset = circumference * (1 - pct);
+            const circle = document.getElementById(`gauge-${i}`);
+            const valEl = document.getElementById(`gauge-val-${i}`);
+            if (circle) circle.style.strokeDashoffset = offset;
+            if (valEl) valEl.textContent = g.value;
+        });
+    }
+    renderGauges();
+
+    // ============================================================
+    //  土壤墒情数据 - 4个参数条
+    // ============================================================
+    const soilConfigs = [
+        { label: '土壤温度', unit: '°C', color: COLORS.orange, value: 22.5, max: 40 },
+        { label: '土壤水分', unit: '%', color: COLORS.cyan, value: 68, max: 100 },
+        { label: '土壤PH值', unit: '', color: COLORS.green, value: 6.8, max: 14 },
+        { label: '电导率', unit: 'μS/cm', color: COLORS.purple, value: 350, max: 800 }
+    ];
+
+    function renderSoilBars() {
+        const list = document.getElementById('soil-list');
+        list.innerHTML = '';
+        soilConfigs.forEach((s, i) => {
+            const pct = (s.value / s.max) * 100;
+            const item = document.createElement('div');
+            item.className = 'soil-item';
+            item.innerHTML = `
+                <div class="soil-item-header">
+                    <span class="label">${s.label}</span>
+                    <span class="val" style="color:${s.color};" id="soil-val-${i}">${s.value}${s.unit}</span>
+                </div>
+                <div class="soil-bar-bg">
+                    <div class="soil-bar-fill" style="width:${pct}%; background: linear-gradient(90deg, ${s.color}88, ${s.color}); box-shadow: 0 0 6px ${s.color}66;" id="soil-bar-${i}"></div>
+                </div>
+            `;
+            list.appendChild(item);
+        });
+    }
+
+    function updateSoilBars() {
+        soilConfigs.forEach((s, i) => {
+            if (s.label === '土壤PH值') {
+                s.value = rand(5.5, 8.0, 1);
+            } else {
+                s.value = rand(s.max * 0.3, s.max * 0.9, s.label === '电导率' ? 0 : 1);
+            }
+            const pct = (s.value / s.max) * 100;
+            const bar = document.getElementById(`soil-bar-${i}`);
+            const val = document.getElementById(`soil-val-${i}`);
+            if (bar) bar.style.width = pct + '%';
+            if (val) val.textContent = s.value + s.unit;
+        });
+    }
+    renderSoilBars();
+
+    // ============================================================
+    //  灌溉统计更新
+    // ============================================================
+    function updateIrrigation() {
+        const water = Math.round(rand(2500, 3200, 0));
+        const events = Math.round(rand(12, 25, 0));
+        const saving = Math.round(rand(60, 85, 0));
+        animateNumber(document.getElementById('irrig-water'), water);
+        document.getElementById('irrig-events-num').textContent = events;
+        document.getElementById('irrig-saving-num').textContent = saving + '%';
+        // 圆环
+        const circ = 157;
+        document.getElementById('irrig-events-circle').style.strokeDashoffset = circ * (1 - events / 30);
+        document.getElementById('irrig-saving-circle').style.strokeDashoffset = circ * (1 - saving / 100);
+    }
+
+    // ============================================================
+    //  农场分布图 - CSS Grid
+    // ============================================================
+    // 地图类型: G=温室 F=鱼塘 O=大田 B=建筑 P=路径 . =空
+    const farmMapData = [
+        'B.B.GGGGGGG.OOO',
+        'BPPPGGGGGGOOOO',
+        'BBPPGGGGGGPPPP',
+        '.PPPPGGGGGPPFF',
+        'OOOPPPGGGGPFFF',
+        'OOOOOPPPPPFFFF'
+    ];
+
+    function renderFarmMap() {
+        const map = document.getElementById('farm-map');
+        map.innerHTML = '';
+        const typeMap = {
+            'G': { class: 'greenhouse', label: '温室' },
+            'F': { class: 'fishpond', label: '鱼塘' },
+            'O': { class: 'outdoor', label: '大田' },
+            'B': { class: 'building', label: '建筑' },
+            'P': { class: 'path', label: '' },
+            '.': { class: 'path', label: '' }
+        };
+        // 使用12列6行
+        const grid = [
+            'BBBGGGGGGGOOO',
+            'BPPPGGGGGGOOO',
+            'BBPPGGGGGPPPP',
+            'PPPPGGGGGPFFF',
+            'OOOPPPGGGPFFF',
+            'OOOOOPPPPFFFF'
+        ];
+        grid.forEach(row => {
+            [...row].forEach(ch => {
+                const cell = document.createElement('div');
+                const t = typeMap[ch] || typeMap['.'];
+                cell.className = `map-cell ${t.class}`;
+                if (t.label) cell.textContent = t.label;
+                map.appendChild(cell);
+            });
+        });
+        // 添加设备标记
+        const markers = [
+            { row: 0, col: 5, color: 'green' },
+            { row: 1, col: 8, color: 'cyan' },
+            { row: 2, col: 3, color: 'green' },
+            { row: 3, col: 9, color: 'red' },
+            { row: 4, col: 2, color: 'orange' },
+            { row: 5, col: 10, color: 'cyan' },
+            { row: 0, col: 11, color: 'green' },
+            { row: 4, col: 7, color: 'green' }
+        ];
+        // 使用绝对定位在地图上放置标记
+        markers.forEach(m => {
+            const marker = document.createElement('div');
+            marker.className = `device-marker ${m.color}`;
+            marker.style.position = 'absolute';
+            marker.style.top = `calc(${(m.row + 0.5) / 6 * 100}% - 4px)`;
+            marker.style.left = `calc(${(m.col + 0.5) / 13 * 100}% - 4px)`;
+            marker.style.animationDelay = Math.random() * 2 + 's';
+            map.appendChild(marker);
+        });
+    }
+    renderFarmMap();
+
+    // ============================================================
+    //  生产统计 KPI
+    // ============================================================
+    const kpiData = [
+        { label: '人员', icon: '👥', value: 36, color: COLORS.cyan },
+        { label: '设备', icon: '📡', value: 11, color: COLORS.green },
+        { label: '任务', icon: '📋', value: 52, color: COLORS.orange },
+        { label: '质检', icon: '✅', value: 25, color: COLORS.purple },
+        { label: '监测', icon: '📊', value: 56, color: COLORS.cyan },
+        { label: '仓储', icon: '📦', value: 21, color: COLORS.green }
+    ];
+
+    function renderKPI(containerId) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        container.innerHTML = '';
+        kpiData.forEach((k, i) => {
+            const item = document.createElement('div');
+            item.className = 'kpi-item';
+            item.innerHTML = `
+                <div class="kpi-icon">${k.icon}</div>
+                <div class="kpi-num glow-text" style="color:${k.color};" id="${containerId}-num-${i}">${k.value}</div>
+                <div class="kpi-label">${k.label}</div>
+            `;
+            container.appendChild(item);
+        });
+    }
+
+    function updateKPI(containerId) {
+        kpiData.forEach((k, i) => {
+            k.value = Math.round(k.value * rand(0.85, 1.15, 2));
+            const el = document.getElementById(`${containerId}-num-${i}`);
+            if (el) animateNumber(el, k.value, 600);
+        });
+    }
+    renderKPI('kpi-row');
+    renderKPI('kpi-row-main');
+
+    // ============================================================
+    //  Chart.js 全局暗色配置
+    // ============================================================
+    Chart.defaults.color = COLORS.dim;
+    Chart.defaults.borderColor = 'rgba(0, 212, 255, 0.1)';
+    Chart.defaults.font.family = '"Microsoft YaHei", sans-serif';
+
+    // ============================================================
+    //  实时数据趋势图（主面板 + 轮显面板）
+    // ============================================================
+    function createTrendChart(canvasId) {
+        const ctx = document.getElementById(canvasId);
+        if (!ctx) return null;
+        const labels = [];
+        for (let i = 23; i >= 0; i--) {
+            labels.push(`${String(i).padStart(2,'0')}:00`);
+        }
+        const genData = (base, range) => labels.map(() => rand(base - range, base + range, 1));
+
+        return new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: '温度(°C)',
+                        data: genData(28, 6),
+                        borderColor: COLORS.orange,
+                        backgroundColor: 'rgba(255, 149, 0, 0.08)',
+                        tension: 0.4,
+                        fill: true,
+                        pointRadius: 0,
+                        pointHoverRadius: 4,
+                        borderWidth: 2
+                    },
+                    {
+                        label: '湿度(%)',
+                        data: genData(65, 15),
+                        borderColor: COLORS.cyan,
+                        backgroundColor: 'rgba(0, 212, 255, 0.08)',
+                        tension: 0.4,
+                        fill: true,
+                        pointRadius: 0,
+                        pointHoverRadius: 4,
+                        borderWidth: 2
+                    },
+                    {
+                        label: '土壤水分(%)',
+                        data: genData(68, 10),
+                        borderColor: COLORS.green,
+                        backgroundColor: 'rgba(0, 255, 136, 0.08)',
+                        tension: 0.4,
+                        fill: true,
+                        pointRadius: 0,
+                        pointHoverRadius: 4,
+                        borderWidth: 2
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { intersect: false, mode: 'index' },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        align: 'end',
+                        labels: { boxWidth: 12, boxHeight: 12, padding: 8, font: { size: 11 } }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(10, 22, 40, 0.95)',
+                        borderColor: 'rgba(0, 212, 255, 0.3)',
+                        borderWidth: 1,
+                        titleColor: COLORS.cyan,
+                        padding: 8,
+                        fontSize: 11
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { color: 'rgba(0, 212, 255, 0.05)' },
+                        ticks: { font: { size: 9 }, maxTicksLimit: 12 }
+                    },
+                    y: {
+                        grid: { color: 'rgba(0, 212, 255, 0.05)' },
+                        ticks: { font: { size: 9 } }
+                    }
+                },
+                animation: { duration: 1200, easing: 'easeOutQuart' }
+            }
+        });
+    }
+
+    const trendChartMain = createTrendChart('trend-chart-main');
+    const trendChartRotation = createTrendChart('trend-chart');
+
+    function updateTrendCharts() {
+        [trendChartMain, trendChartRotation].forEach(chart => {
+            if (!chart) return;
+            chart.data.datasets.forEach(ds => {
+                ds.data = ds.data.map(v => {
+                    const base = ds.label.includes('温度') ? 28 : ds.label.includes('湿度') ? 65 : 68;
+                    const range = ds.label.includes('温度') ? 6 : ds.label.includes('湿度') ? 15 : 10;
+                    return Math.max(0, v + rand(-3, 3, 1));
+                });
+            });
+            chart.update('none');
+        });
+    }
+
+    // ============================================================
+    //  灌溉状态图（轮显用）
+    // ============================================================
+    let irrigationChart = null;
+    function createIrrigationChart() {
+        const ctx = document.getElementById('irrigation-chart');
+        if (!ctx) return null;
+        const labels = ['00','03','06','09','12','15','18','21'];
+        return new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels.map(l => l + ':00'),
+                datasets: [{
+                    label: '用水量(m³)',
+                    data: labels.map(() => rand(100, 500, 0)),
+                    backgroundColor: ctx => {
+                        const c = ctx.chart.ctx;
+                        const gradient = c.createLinearGradient(0, 0, 0, 200);
+                        gradient.addColorStop(0, 'rgba(0, 212, 255, 0.8)');
+                        gradient.addColorStop(1, 'rgba(0, 212, 255, 0.1)');
+                        return gradient;
+                    },
+                    borderRadius: 4,
+                    barThickness: 'flex',
+                    maxBarThickness: 30
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: true, labels: { font: { size: 11 } } },
+                    tooltip: {
+                        backgroundColor: 'rgba(10, 22, 40, 0.95)',
+                        borderColor: 'rgba(0, 212, 255, 0.3)',
+                        borderWidth: 1
+                    }
+                },
+                scales: {
+                    x: { grid: { color: 'rgba(0,212,255,0.05)' }, ticks: { font: { size: 9 } } },
+                    y: { grid: { color: 'rgba(0,212,255,0.05)' }, ticks: { font: { size: 9 } } }
+                }
+            }
+        });
+    }
+    irrigationChart = createIrrigationChart();
+
+    // ============================================================
+    //  设备状态分布 - 环形图
+    // ============================================================
+    let deviceData = { online: 285, offline: 42, alarm: 15 };
+    const deviceChart = new Chart(document.getElementById('device-chart'), {
+        type: 'doughnut',
+        data: {
+            labels: ['在线', '离线', '告警'],
+            datasets: [{
+                data: [deviceData.online, deviceData.offline, deviceData.alarm],
+                backgroundColor: [COLORS.green, COLORS.dim, COLORS.red],
+                borderColor: ['rgba(0,255,136,0.5)', 'rgba(255,255,255,0.1)', 'rgba(255,77,79,0.5)'],
+                borderWidth: 1,
+                hoverOffset: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '68%',
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'rgba(10, 22, 40, 0.95)',
+                    borderColor: 'rgba(0, 212, 255, 0.3)',
+                    borderWidth: 1
+                }
+            },
+            animation: { animateRotate: true, duration: 1000 }
+        }
+    });
+
+    function renderDeviceStats() {
+        const container = document.getElementById('device-stats');
+        container.innerHTML = '';
+        const total = deviceData.online + deviceData.offline + deviceData.alarm;
+        const items = [
+            { label: '在线设备', value: deviceData.online, color: COLORS.green, dotClass: 'online' },
+            { label: '离线设备', value: deviceData.offline, color: COLORS.dim, dotClass: 'offline' },
+            { label: '告警设备', value: deviceData.alarm, color: COLORS.red, dotClass: 'alarm' },
+            { label: '设备总数', value: total, color: COLORS.cyan, dotClass: 'online' }
+        ];
+        items.forEach(item => {
+            const el = document.createElement('div');
+            el.className = 'device-stat-item';
+            el.innerHTML = `
+                <div class="device-stat-dot ${item.dotClass}"></div>
+                <span style="color:${item.color};">${item.label}</span>
+                <span class="device-stat-num" style="color:${item.color};">${item.value}</span>
+            `;
+            container.appendChild(el);
+        });
+    }
+    renderDeviceStats();
+
+    function updateDeviceChart() {
+        deviceData.online = Math.round(rand(270, 310, 0));
+        deviceData.offline = Math.round(rand(30, 55, 0));
+        deviceData.alarm = Math.round(rand(8, 20, 0));
+        deviceChart.data.datasets[0].data = [deviceData.online, deviceData.offline, deviceData.alarm];
+        deviceChart.update('none');
+        renderDeviceStats();
+    }
+
+    // ============================================================
+    //  虫情/孢子预警 - 柱状图
+    // ============================================================
+    const pestChart = new Chart(document.getElementById('pest-chart'), {
+        type: 'bar',
+        data: {
+            labels: ['蚜虫', '飞虱', '叶蝉', '螟虫', '蝗虫', '蓟马'],
+            datasets: [{
+                label: '虫口数量',
+                data: [45, 78, 32, 56, 18, 41],
+                backgroundColor: (ctx) => {
+                    const chart = ctx.chart;
+                    const { ctx: c, chartArea } = chart;
+                    if (!chartArea) return COLORS.orange;
+                    const gradient = c.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+                    gradient.addColorStop(0, 'rgba(255, 149, 0, 0.2)');
+                    gradient.addColorStop(1, 'rgba(255, 77, 79, 0.8)');
+                    return gradient;
+                },
+                borderRadius: 3,
+                barThickness: 'flex',
+                maxBarThickness: 24
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            indexAxis: 'y',
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'rgba(10, 22, 40, 0.95)',
+                    borderColor: 'rgba(0, 212, 255, 0.3)',
+                    borderWidth: 1
+                }
+            },
+            scales: {
+                x: { grid: { color: 'rgba(0,212,255,0.05)' }, ticks: { font: { size: 9 } } },
+                y: { grid: { display: false }, ticks: { font: { size: 10 } } }
+            },
+            animation: { duration: 1000 }
+        }
+    });
+
+    function updatePestChart() {
+        pestChart.data.datasets[0].data = pestChart.data.labels.map(() => Math.round(rand(10, 90, 0)));
+        pestChart.update('none');
+        // 风险等级
+        const risk = rand(0, 100, 0);
+        const riskEl = document.getElementById('spore-risk-level');
+        if (riskEl) {
+            if (risk > 70) { riskEl.textContent = '高风险'; riskEl.style.color = COLORS.red; }
+            else if (risk > 40) { riskEl.textContent = '中风险'; riskEl.style.color = COLORS.orange; }
+            else { riskEl.textContent = '低风险'; riskEl.style.color = COLORS.green; }
+        }
+    }
+
+    // ============================================================
+    //  告警列表
+    // ============================================================
+    const alarmTemplates = [
+        { type: '🌡️', desc: '温室A区温度超限 38.5°C', level: 'red' },
+        { type: '💧', desc: '土壤湿度低于阈值 35%', level: 'yellow' },
+        { type: '📡', desc: '传感器节点离线 #ST-023', level: 'red' },
+        { type: '🐛', desc: '虫情监测点虫口密度上升', level: 'yellow' },
+        { type: '🍄', desc: '孢子浓度预警 区域B', level: 'red' },
+        { type: '✅', desc: '灌溉任务完成 灌区3', level: 'green' },
+        { type: '📡', desc: '气象站数据恢复正常', level: 'green' },
+        { type: '⚡', desc: '能耗异常 设备组D-12', level: 'yellow' },
+        { type: '🌬️', desc: '风速超过8级预警', level: 'red' },
+        { type: '✅', desc: '质检批次QC-088通过', level: 'green' },
+        { type: '📊', desc: 'CO2浓度偏高 680ppm', level: 'yellow' },
+        { type: '🔧', desc: '设备维护提醒 泵站2', level: 'yellow' }
+    ];
+
+    function getTimeStr(offsetMin) {
+        const now = new Date(Date.now() - offsetMin * 60000);
+        return `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+    }
+
+    function renderAlarms() {
+        const scroll = document.getElementById('alarm-scroll');
+        scroll.innerHTML = '';
+        // 生成两组数据用于无缝滚动
+        const items = [];
+        for (let i = 0; i < 12; i++) {
+            const a = alarmTemplates[i % alarmTemplates.length];
+            items.push({
+                ...a,
+                time: getTimeStr(i * 7 + Math.floor(Math.random() * 3))
+            });
+        }
+        // 复制一份用于循环
+        const allItems = [...items, ...items];
+        allItems.forEach(a => {
+            const el = document.createElement('div');
+            el.className = `alarm-item ${a.level}`;
+            const levelText = a.level === 'red' ? '紧急' : a.level === 'yellow' ? '警告' : '正常';
+            el.innerHTML = `
+                <span class="alarm-time">${a.time}</span>
+                <span class="alarm-icon">${a.type}</span>
+                <span class="alarm-desc">${a.desc}</span>
+                <span class="alarm-level ${a.level}">${levelText}</span>
+            `;
+            scroll.appendChild(el);
+        });
+    }
+    renderAlarms();
+
+    // 定期在列表顶部插入新告警
+    function addNewAlarm() {
+        const scroll = document.getElementById('alarm-scroll');
+        const a = alarmTemplates[Math.floor(Math.random() * alarmTemplates.length)];
+        a.time = getTimeStr(0);
+        const el = document.createElement('div');
+        el.className = `alarm-item ${a.level}`;
+        const levelText = a.level === 'red' ? '紧急' : a.level === 'yellow' ? '警告' : '正常';
+        el.innerHTML = `
+            <span class="alarm-time">${a.time}</span>
+            <span class="alarm-icon">${a.type}</span>
+            <span class="alarm-desc">${a.desc}</span>
+            <span class="alarm-level ${a.level}">${levelText}</span>
+        `;
+        // 添加到列表前部和其镜像前部
+        scroll.insertBefore(el.cloneNode(true), scroll.firstChild);
+        // 确保镜像部分也有对应项
+    }
+
+    // ============================================================
+    //  天气更新
+    // ============================================================
+    function updateWeather() {
+        const temp = Math.round(rand(20, 35, 0));
+        const humidity = Math.round(rand(50, 85, 0));
+        const icons = ['☀️', '⛅', '☁️', '🌧️', '🌤️'];
+        document.getElementById('weather-temp').textContent = temp + '°C';
+        document.getElementById('weather-humidity').textContent = '湿度' + humidity + '%';
+        document.getElementById('weather-icon').textContent = icons[Math.floor(Math.random() * icons.length)];
+    }
+    updateWeather();
+
+    // ============================================================
+    //  自动轮显功能
+    // ============================================================
+    let rotationEnabled = false;
+    let rotationIndex = 0;
+    let rotationTimer = null;
+    const rotationViews = ['view-map', 'view-trend', 'view-kpi', 'view-irrigation'];
+    const rotationTitles = ['农场分布图', '实时数据趋势', '生产统计', '灌溉状态'];
+    const centerTopPanel = document.getElementById('center-top-panel');
+    const centerMidPanel = document.getElementById('center-mid-panel');
+    const centerBotPanel = document.getElementById('center-bot-panel');
+    const indicators = document.getElementById('rotation-indicators');
+    const dots = indicators.querySelectorAll('.rotation-dot');
+
+    function switchRotationView(idx) {
+        rotationViews.forEach((id, i) => {
+            const el = document.getElementById(id);
+            if (i === idx) el.classList.add('active');
+            else el.classList.remove('active');
+        });
+        dots.forEach((d, i) => {
+            d.classList.toggle('active', i === idx);
+        });
+        document.getElementById('center-top-title').textContent = rotationTitles[idx];
+    }
+
+    function toggleRotation() {
+        rotationEnabled = !rotationEnabled;
+        const btn = document.getElementById('rotation-toggle');
+        btn.classList.toggle('active', rotationEnabled);
+        indicators.style.display = rotationEnabled ? 'flex' : 'none';
+
+        if (rotationEnabled) {
+            // 隐藏中部和底部面板，扩展顶部面板
+            centerMidPanel.style.display = 'none';
+            centerBotPanel.style.display = 'none';
+            centerTopPanel.style.flex = '1';
+            switchRotationView(0);
+            rotationTimer = setInterval(() => {
+                rotationIndex = (rotationIndex + 1) % rotationViews.length;
+                switchRotationView(rotationIndex);
+            }, 10000);
+        } else {
+            // 恢复显示
+            centerMidPanel.style.display = 'flex';
+            centerBotPanel.style.display = 'flex';
+            centerTopPanel.style.flex = '1.2';
+            clearInterval(rotationTimer);
+            rotationTimer = null;
+            // 只显示地图视图
+            rotationViews.forEach((id, i) => {
+                const el = document.getElementById(id);
+                el.classList.toggle('active', i === 0);
+            });
+            document.getElementById('center-top-title').textContent = rotationTitles[0];
+            dots.forEach((d, i) => d.classList.toggle('active', i === 0));
+        }
+    }
+    document.getElementById('rotation-toggle').addEventListener('click', toggleRotation);
+
+    // ============================================================
+    //  定时数据更新（每3秒）
+    // ============================================================
+    setInterval(() => {
+        updateGauges();
+        updateSoilBars();
+        updateIrrigation();
+        updateTrendCharts();
+        updateKPI('kpi-row');
+        updateKPI('kpi-row-main');
+        updateDeviceChart();
+        updatePestChart();
+        updateWeather();
+    }, 3000);
+
+    // 告警列表定期刷新（每10秒添加新告警并重新渲染）
+    setInterval(() => {
+        renderAlarms();
+    }, 10000);
+
+    // ============================================================
+    //  初始化灌溉图表（轮显视图可能需要延迟创建）
+    // ============================================================
+    setTimeout(() => {
+        if (irrigationChart) irrigationChart.resize();
+        if (trendChartRotation) trendChartRotation.resize();
+    }, 100);
+
+    // 窗口大小变化时重绘图表
+    window.addEventListener('resize', () => {
+        [trendChartMain, trendChartRotation, deviceChart, pestChart, irrigationChart].forEach(c => {
+            if (c) c.resize();
+        });
+    });
+    </script>
+</body>
+</html>

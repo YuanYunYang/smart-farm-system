@@ -22,6 +22,9 @@ public class Sensor implements Serializable {
     @TableId(type = IdType.AUTO)
     private Long id;
 
+    /** 租户ID（多租户隔离） */
+    private Long tenantId;
+
     /** 所属农场ID */
     private Long farmId;
 
@@ -48,6 +51,9 @@ public class Sensor implements Serializable {
 
     /** 预警下限 */
     private Double thresholdMin;
+
+    /** 设备认证密钥 (用于 EMQX HTTP Auth 校验) */
+    private String deviceSecret;
 
     /** 在线状态: 0-离线, 1-在线 */
     private Integer onlineStatus;

@@ -5,12 +5,15 @@ import com.farm.smart.mqtt.MqttClientManager;
 import com.farm.smart.mqtt.MqttTopicHandler;
 import com.farm.smart.model.dto.SensorDataDTO;
 import com.farm.smart.service.MqttMessageService;
+import com.farm.smart.service.OtaService;
 import com.farm.smart.service.SensorDataService;
 import com.farm.smart.service.IrrigationService;
+import com.farm.smart.tenant.TenantContext;
 import com.farm.smart.websocket.FarmWebSocketHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -33,10 +36,13 @@ public class MqttMessageServiceImpl implements MqttMessageService {
     private final SensorDataService sensorDataService;
     @Lazy
     private final IrrigationService irrigationService;
+    @Lazy
+    private final OtaService otaService;
 
     private final MqttClientManager mqttClientManager;
     private final MqttTopicHandler topicHandler;
     private final FarmWebSocketHandler webSocketHandler;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
@@ -89,17 +95,20 @@ public class MqttMessageServiceImpl implements MqttMessageService {
     @Override
     @SuppressWarnings("unchecked")
     public void handleIncomingMessage(String topic, String payload) {
-        // 解析 topic 确定消息类型
-        MqttTopicHandler.TopicParseResult parseResult = topicHandler.parseTopic(topic);
-
+        // MQTT 消息处理无 HTTP 请求上下文，需忽略租户隔离
+        TenantContext.setIgnore(true);
         try {
+            // 解析 topic 确定消息类型
+            MqttTopicHandler.TopicParseResult parseResult = topicHandler.parseTopic(topic);
+
             Map<String, Object> message = objectMapper.readValue(payload, Map.class);
 
             switch (parseResult.type()) {
                 case SENSOR_DATA -> {
-                    // 传感器数据上报 -> 交给 SensorDataService 处理
+                    // 传感器数据上报 → 发送到 Kafka 异步处理（解耦数据库写入）
                     SensorDataDTO dto = parseSensorData(message, parseResult.farmId(), parseResult.sensorId());
-                    sensorDataService.processSensorData(dto);
+                    kafkaTemplate.send("farm-sensor-data", dto);
+                    log.debug("传感器数据已发送到 Kafka: sensorId={}", dto.getSensorId());
                 }
                 case CONTROL_RESPONSE -> {
                     // 设备控制回复 -> 交给 IrrigationService 处理
@@ -109,10 +118,17 @@ public class MqttMessageServiceImpl implements MqttMessageService {
                     // 设备状态/心跳 -> 更新在线状态
                     handleDeviceStatus(message, parseResult.farmId());
                 }
+                case OTA_PROGRESS -> {
+                    // OTA 升级进度上报 -> 交给 OtaService 处理
+                    otaService.handleOtaProgress(topic, payload);
+                    log.debug("OTA 进度消息已处理: topic={}", topic);
+                }
                 case UNKNOWN -> log.warn("收到未识别类型的 MQTT 消息: topic={}", topic);
             }
         } catch (Exception e) {
             log.error("解析 MQTT 消息失败: topic={}, payload={}", topic, payload, e);
+        } finally {
+            TenantContext.clear();
         }
     }
 

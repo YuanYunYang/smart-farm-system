@@ -33,6 +33,10 @@ public class MqttTopicHandler {
     private static final Pattern DEVICE_STATUS_PATTERN =
             Pattern.compile("farm/(\\d+)/device/status");
 
+    /** OTA 升级进度上报 topic 模式 */
+    private static final Pattern OTA_PROGRESS_PATTERN =
+            Pattern.compile("farm/(\\d+)/ota/progress");
+
     /**
      * 解析 topic 并返回处理类型
      *
@@ -57,6 +61,12 @@ public class MqttTopicHandler {
         if (deviceMatcher.matches()) {
             return new TopicParseResult(MessageType.DEVICE_STATUS,
                     Long.parseLong(deviceMatcher.group(1)), null);
+        }
+
+        Matcher otaMatcher = OTA_PROGRESS_PATTERN.matcher(topic);
+        if (otaMatcher.matches()) {
+            return new TopicParseResult(MessageType.OTA_PROGRESS,
+                    Long.parseLong(otaMatcher.group(1)), null);
         }
 
         log.warn("未识别的 MQTT topic: {}", topic);
@@ -85,12 +95,27 @@ public class MqttTopicHandler {
     }
 
     /**
+     * 构建 OTA 升级指令下发 topic
+     */
+    public String buildOtaCommandTopic(Long farmId) {
+        return String.format("farm/%d/ota/command", farmId);
+    }
+
+    /**
+     * 构建 OTA 升级进度上报 topic
+     */
+    public String buildOtaProgressTopic(Long farmId) {
+        return String.format("farm/%d/ota/progress", farmId);
+    }
+
+    /**
      * 消息类型枚举
      */
     public enum MessageType {
         SENSOR_DATA,         // 传感器数据上报
         CONTROL_RESPONSE,    // 设备控制回复
         DEVICE_STATUS,       // 设备状态
+        OTA_PROGRESS,        // OTA 升级进度上报
         UNKNOWN              // 未知
     }
 

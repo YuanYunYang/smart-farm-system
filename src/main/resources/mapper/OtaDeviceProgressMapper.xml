@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.farm.smart.repository.OtaDeviceProgressMapper">
+
+    <!-- 结果映射 -->
+    <resultMap id="otaDeviceProgressMap" type="com.farm.smart.model.entity.OtaDeviceProgress">
+        <id column="id" property="id"/>
+        <result column="task_id" property="taskId"/>
+        <result column="device_id" property="deviceId"/>
+        <result column="device_type" property="deviceType"/>
+        <result column="status" property="status"/>
+        <result column="current_version" property="currentVersion"/>
+        <result column="target_version" property="targetVersion"/>
+        <result column="error_msg" property="errorMsg"/>
+        <result column="upgrade_time" property="upgradeTime"/>
+    </resultMap>
+
+    <!-- 根据任务ID查询所有设备进度 -->
+    <select id="selectByTaskId" resultMap="otaDeviceProgressMap">
+        SELECT id, task_id, device_id, device_type, status,
+               current_version, target_version, error_msg, upgrade_time
+        FROM ota_device_progress
+        WHERE task_id = #{taskId}
+        ORDER BY id
+    </select>
+
+    <!-- 根据任务ID统计成功数量 -->
+    <select id="countSuccessByTaskId" resultType="int">
+        SELECT COUNT(*) FROM ota_device_progress
+        WHERE task_id = #{taskId} AND status = 'SUCCESS'
+    </select>
+
+    <!-- 根据任务ID统计失败数量 -->
+    <select id="countFailedByTaskId" resultType="int">
+        SELECT COUNT(*) FROM ota_device_progress
+        WHERE task_id = #{taskId} AND status = 'FAILED'
+    </select>
+
+</mapper>

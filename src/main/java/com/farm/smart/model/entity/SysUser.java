@@ -23,6 +23,9 @@ public class SysUser implements Serializable {
     @TableId(type = IdType.AUTO)
     private Long id;
 
+    /** 租户ID（多租户隔离） */
+    private Long tenantId;
+
     /** 用户名 (登录账号, 唯一) */
     private String username;
 

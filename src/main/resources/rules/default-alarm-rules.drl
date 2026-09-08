@@ -1,0 +1,48 @@
+package farm.alarm.rules;
+
+import com.farm.smart.model.dto.SensorDataFact;
+import com.farm.smart.model.dto.AlarmResult;
+
+// ============================================================
+// 智能农场默认告警规则
+// 基于 Drools 规则引擎, 对传感器数据进行实时告警评估
+// @author Smart Farm Team
+// ============================================================
+
+// 规则1: 土壤湿度过低告警 (< 20% CRITICAL)
+// 当土壤湿度低于20%时, 触发严重告警, 需要立即灌溉
+rule "Low Soil Moisture Critical Alert"
+    salience 100
+    when
+        $fact : SensorDataFact(sensorType == "soil_moisture", value != null, value < 20.0)
+    then
+        $fact.addResult(new AlarmResult("CRITICAL", "SOIL_MOISTURE_LOW",
+            "土壤湿度过低告警",
+            "土壤湿度 " + $fact.getValue() + "% 低于临界值 20%，需要立即灌溉"));
+end
+
+// 规则2: 温度过高 + 湿度过低复合告警 (WARNING)
+// 当同一农场温度超过35°C且湿度低于40%时, 触发复合告警
+// 需要同时插入温度和湿度两个 SensorDataFact (同一 farmId) 才能触发
+rule "High Temp Low Humidity Composite Warning"
+    salience 90
+    when
+        $temp : SensorDataFact(sensorType == "temperature", value != null, value > 35.0)
+        $humi : SensorDataFact(sensorType == "humidity", value != null, value < 40.0, farmId == $temp.farmId)
+    then
+        $temp.addResult(new AlarmResult("WARN", "TEMP_HUMI_COMPOSITE",
+            "温度过高且湿度过低复合告警",
+            "温度 " + $temp.getValue() + "°C 超过35°C 且湿度 " + $humi.getValue() + "% 低于40%，存在作物脱水风险"));
+end
+
+// 规则3: CO2浓度超标告警 (> 1000ppm INFO)
+// 当CO2浓度超过1000ppm时, 触发提示级告警, 建议通风
+rule "CO2 Exceeding Info Alert"
+    salience 80
+    when
+        $fact : SensorDataFact(sensorType == "co2", value != null, value > 1000.0)
+    then
+        $fact.addResult(new AlarmResult("INFO", "CO2_EXCEEDING",
+            "CO2浓度超标告警",
+            "CO2浓度 " + $fact.getValue() + "ppm 超过标准值 1000ppm，建议通风换气"));
+end

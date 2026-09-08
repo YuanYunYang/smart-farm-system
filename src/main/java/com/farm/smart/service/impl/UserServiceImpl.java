@@ -14,6 +14,7 @@ import com.farm.smart.model.vo.LoginVO;
 import com.farm.smart.model.vo.UserVO;
 import com.farm.smart.repository.UserMapper;
 import com.farm.smart.service.UserService;
+import com.farm.smart.tenant.TenantContext;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,31 +46,37 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public LoginVO login(LoginDTO dto) {
-        // 1. 按用户名查询
-        SysUser user = findByUsername(dto.getUsername());
-        if (user == null) {
-            throw new BusinessException(ResultCode.USERNAME_OR_PASSWORD_ERROR);
+        // 登录时无租户上下文，需忽略租户隔离查询用户
+        TenantContext.setIgnore(true);
+        try {
+            // 1. 按用户名查询
+            SysUser user = findByUsername(dto.getUsername());
+            if (user == null) {
+                throw new BusinessException(ResultCode.USERNAME_OR_PASSWORD_ERROR);
+            }
+
+            // 2. 校验密码 (BCrypt)
+            if (!BCrypt.checkpw(dto.getPassword(), user.getPassword())) {
+                throw new BusinessException(ResultCode.USERNAME_OR_PASSWORD_ERROR);
+            }
+
+            // 3. 校验账号状态
+            if (user.getStatus() != null && user.getStatus() == 0) {
+                throw new BusinessException(ResultCode.USER_DISABLED);
+            }
+
+            // 4. 签发 JWT token（携带租户ID）
+            String token = JwtUtils.generateToken(user.getUsername(), user.getRole(), user.getTenantId());
+
+            LoginVO vo = new LoginVO();
+            vo.setToken(token);
+            vo.setUsername(user.getUsername());
+            vo.setRole(user.getRole());
+            log.info("用户登录成功: username={}, role={}, tenantId={}", user.getUsername(), user.getRole(), user.getTenantId());
+            return vo;
+        } finally {
+            TenantContext.clear();
         }
-
-        // 2. 校验密码 (BCrypt)
-        if (!BCrypt.checkpw(dto.getPassword(), user.getPassword())) {
-            throw new BusinessException(ResultCode.USERNAME_OR_PASSWORD_ERROR);
-        }
-
-        // 3. 校验账号状态
-        if (user.getStatus() != null && user.getStatus() == 0) {
-            throw new BusinessException(ResultCode.USER_DISABLED);
-        }
-
-        // 4. 签发 JWT token
-        String token = JwtUtils.generateToken(user.getUsername(), user.getRole());
-
-        LoginVO vo = new LoginVO();
-        vo.setToken(token);
-        vo.setUsername(user.getUsername());
-        vo.setRole(user.getRole());
-        log.info("用户登录成功: username={}, role={}", user.getUsername(), user.getRole());
-        return vo;
     }
 
     @Override

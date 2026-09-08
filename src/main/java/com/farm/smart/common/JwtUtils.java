@@ -52,18 +52,20 @@ public class JwtUtils {
     }
 
     /**
-     * 生成 JWT token
+     * 生成 JWT token（携带租户ID）
      *
      * @param username 用户名 (作为 subject)
      * @param role     角色 (自定义 claim)
+     * @param tenantId 租户ID (多租户隔离)
      * @return 签名后的 token 字符串
      */
-    public static String generateToken(String username, String role) {
+    public static String generateToken(String username, String role, Long tenantId) {
         Date now = new Date();
         Date expiryDate = new Date(System.currentTimeMillis() + EXPIRATION);
         return Jwts.builder()
                 .subject(username)
                 .claim("role", role)
+                .claim("tenantId", tenantId)
                 .issuedAt(now)
                 .expiration(expiryDate)
                 .signWith(KEY)
@@ -103,6 +105,21 @@ public class JwtUtils {
     public static String getRoleFromToken(String token) {
         Claims claims = parseToken(token);
         return claims != null ? claims.get("role", String.class) : null;
+    }
+
+    /**
+     * 从 token 中获取租户 ID
+     */
+    public static Long getTenantIdFromToken(String token) {
+        Claims claims = parseToken(token);
+        if (claims == null) {
+            return null;
+        }
+        Object tenantId = claims.get("tenantId");
+        if (tenantId instanceof Number) {
+            return ((Number) tenantId).longValue();
+        }
+        return null;
     }
 
     /**

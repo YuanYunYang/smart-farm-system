@@ -22,6 +22,9 @@ public class IrrigationLog implements Serializable {
     @TableId(type = IdType.AUTO)
     private Long id;
 
+    /** 租户ID（多租户隔离） */
+    private Long tenantId;
+
     /** 关联的灌溉规则ID */
     private Long ruleId;
 

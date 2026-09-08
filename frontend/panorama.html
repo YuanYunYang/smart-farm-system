@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>智慧农业大数据平台 — 业务全景图</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "Microsoft YaHei", "PingFang SC", -apple-system, sans-serif;
+    background: linear-gradient(135deg, #0a1e15 0%, #0d2818 30%, #0a2a1a 60%, #061810 100%);
+    min-height: 100vh;
+    overflow-x: auto;
+    color: #e0e0e0;
+  }
+  .container {
+    min-width: 1200px;
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 30px 40px 60px;
+  }
+  /* ===== Title ===== */
+  .header {
+    text-align: center;
+    margin-bottom: 30px;
+  }
+  .header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 4px;
+    text-shadow: 0 0 20px rgba(0,255,136,0.3);
+    margin-bottom: 8px;
+  }
+  .header .subtitle {
+    font-size: 14px;
+    color: #5a8a6a;
+    letter-spacing: 2px;
+  }
+  /* ===== Layer ===== */
+  .layer {
+    display: flex;
+    align-items: stretch;
+    margin-bottom: 14px;
+    position: relative;
+  }
+  .layer-label {
+    flex-shrink: 0;
+    width: 130px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px 0 0 10px;
+    padding: 10px;
+    position: relative;
+  }
+  .layer-label .icon {
+    font-size: 28px;
+    margin-bottom: 6px;
+  }
+  .layer-label .name {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    writing-mode: vertical-rl;
+    text-orientation: upright;
+  }
+  .layer-label .en {
+    font-size: 9px;
+    opacity: 0.6;
+    margin-top: 4px;
+    writing-mode: vertical-rl;
+  }
+  .layer-content {
+    flex: 1;
+    display: flex;
+    gap: 12px;
+    padding: 14px 16px;
+    border-radius: 0 10px 10px 0;
+    overflow-x: auto;
+  }
+  /* Module card */
+  .module {
+    flex: 1;
+    min-width: 120px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    padding: 12px 10px;
+    text-align: center;
+    transition: all 0.3s;
+    cursor: default;
+    position: relative;
+    overflow: hidden;
+  }
+  .module:hover {
+    background: rgba(255,255,255,0.08);
+    transform: translateY(-3px);
+    border-color: rgba(0,255,136,0.3);
+    box-shadow: 0 4px 20px rgba(0,255,136,0.1);
+  }
+  .module .m-icon {
+    font-size: 24px;
+    margin-bottom: 6px;
+    display: block;
+  }
+  .module .m-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #e8e8e8;
+    margin-bottom: 2px;
+  }
+  .module .m-desc {
+    font-size: 10px;
+    color: #888;
+    line-height: 1.4;
+  }
+  .module .m-tag {
+    display: inline-block;
+    font-size: 9px;
+    padding: 1px 6px;
+    border-radius: 4px;
+    margin-top: 4px;
+  }
+  /* Group container */
+  .group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .group-title {
+    font-size: 11px;
+    color: #666;
+    text-align: center;
+    margin-bottom: 2px;
+  }
+  .group-modules {
+    display: flex;
+    gap: 8px;
+  }
+  /* Layer color themes */
+  /* User Layer */
+  .layer-user .layer-label { background: linear-gradient(135deg, #1a4a7a, #0d3358); }
+  .layer-user .layer-content { background: rgba(26,74,122,0.06); border: 1px solid rgba(26,74,122,0.12); border-left: none; }
+  .layer-user .module:hover { border-color: rgba(64,158,255,0.4); box-shadow: 0 4px 20px rgba(64,158,255,0.15); }
+  .layer-user .m-tag { background: rgba(64,158,255,0.15); color: #409eff; }
+  /* Presentation Layer */
+  .layer-pres .layer-label { background: linear-gradient(135deg, #4a1a7a, #330d58); }
+  .layer-pres .layer-content { background: rgba(74,26,122,0.06); border: 1px solid rgba(74,26,122,0.12); border-left: none; }
+  .layer-pres .module:hover { border-color: rgba(168,85,247,0.4); box-shadow: 0 4px 20px rgba(168,85,247,0.15); }
+  .layer-pres .m-tag { background: rgba(168,85,247,0.15); color: #a855f7; }
+  /* Application Layer */
+  .layer-app .layer-label { background: linear-gradient(135deg, #7a4a1a, #58330d); }
+  .layer-app .layer-content { background: rgba(255,140,0,0.04); border: 1px solid rgba(255,140,0,0.12); border-left: none; }
+  .layer-app .module:hover { border-color: rgba(255,149,0,0.4); box-shadow: 0 4px 20px rgba(255,149,0,0.15); }
+  .layer-app .m-tag { background: rgba(255,149,0,0.15); color: #ff9500; }
+  /* Platform Layer */
+  .layer-plat .layer-label { background: linear-gradient(135deg, #1a5a3a, #0d3d28); }
+  .layer-plat .layer-content { background: rgba(0,255,136,0.03); border: 1px solid rgba(0,255,136,0.12); border-left: none; }
+  .layer-plat .module:hover { border-color: rgba(0,255,136,0.4); box-shadow: 0 4px 20px rgba(0,255,136,0.15); }
+  .layer-plat .m-tag { background: rgba(0,255,136,0.12); color: #00ff88; }
+  /* Data Layer */
+  .layer-data .layer-label { background: linear-gradient(135deg, #5a1a4a, #3d0d33); }
+  .layer-data .layer-content { background: rgba(255,77,159,0.03); border: 1px solid rgba(255,77,159,0.1); border-left: none; }
+  .layer-data .module:hover { border-color: rgba(255,77,159,0.4); box-shadow: 0 4px 20px rgba(255,77,159,0.1); }
+  .layer-data .m-tag { background: rgba(255,77,159,0.12); color: #ff4d9f; }
+  /* Network Layer */
+  .layer-net .layer-label { background: linear-gradient(135deg, #1a3a5a, #0d2840); }
+  .layer-net .layer-content { background: rgba(64,158,255,0.03); border: 1px solid rgba(64,158,255,0.1); border-left: none; }
+  .layer-net .module:hover { border-color: rgba(64,158,255,0.4); box-shadow: 0 4px 20px rgba(64,158,255,0.1); }
+  .layer-net .m-tag { background: rgba(64,158,255,0.12); color: #409eff; }
+  /* Perception Layer */
+  .layer-perc .layer-label { background: linear-gradient(135deg, #3a5a1a, #283d0d); }
+  .layer-perc .layer-content { background: rgba(82,196,26,0.03); border: 1px solid rgba(82,196,26,0.12); border-left: none; }
+  .layer-perc .module:hover { border-color: rgba(82,196,26,0.4); box-shadow: 0 4px 20px rgba(82,196,26,0.15); }
+  .layer-perc .m-tag { background: rgba(82,196,26,0.12); color: #52c41a; }
+
+  /* ===== Arrow between layers ===== */
+  .arrow-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 20px;
+    margin: -4px 0;
+    position: relative;
+  }
+  .arrow-row::before {
+    content: '';
+    width: 2px;
+    height: 100%;
+    background: linear-gradient(to bottom, rgba(255,255,255,0.15), rgba(255,255,255,0.05));
+  }
+  .arrow-row .arrow-label {
+    position: absolute;
+    font-size: 10px;
+    color: #555;
+    background: rgba(10,30,21,0.9);
+    padding: 0 8px;
+    border-radius: 4px;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  /* ===== Footer stats ===== */
+  .footer-stats {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin-top: 30px;
+    padding: 20px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+  }
+  .stat {
+    text-align: center;
+  }
+  .stat .num {
+    font-size: 28px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #00ff88, #00d4ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .stat .label {
+    font-size: 12px;
+    color: #666;
+    margin-top: 2px;
+  }
+  /* ===== Legend ===== */
+  .legend {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: #888;
+  }
+  .legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+  }
+  /* Highlight module */
+  .module.highlight {
+    border-color: rgba(0,255,136,0.4);
+    background: rgba(0,255,136,0.05);
+    box-shadow: 0 0 15px rgba(0,255,136,0.08);
+  }
+  .module.highlight .m-name {
+    color: #00ff88;
+  }
+  /* SVG flow lines */
+  .flow-svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .layer { z-index: 1; }
+  /* Scan line effect */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 3px,
+      rgba(0,255,136,0.01) 3px,
+      rgba(0,255,136,0.01) 4px
+    );
+    pointer-events: none;
+    z-index: 9999;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Title -->
+  <div class="header">
+    <h1>智慧农业大数据平台 — 业务全景图</h1>
+    <div class="subtitle">SMART AGRICULTURE BIG DATA PLATFORM · BUSINESS PANORAMA</div>
+  </div>
+
+  <!-- ===== Layer 1: 用户层 ===== -->
+  <div class="layer layer-user">
+    <div class="layer-label">
+      <span class="icon">👥</span>
+      <span class="name">用户层</span>
+    </div>
+    <div class="layer-content">
+      <div class="module">
+        <span class="m-icon">👨‍💼</span>
+        <div class="m-name">管理员</div>
+        <div class="m-desc">一级账号<br>全平台管理权限</div>
+        <span class="m-tag">一级</span>
+      </div>
+      <div class="module">
+        <span class="m-icon">🧑‍🌾</span>
+        <div class="m-name">普通用户</div>
+        <div class="m-desc">二级账号<br>农场级管理权限</div>
+        <span class="m-tag">二级</span>
+      </div>
+      <div class="module">
+        <span class="m-icon">👷</span>
+        <div class="m-name">子账号</div>
+        <div class="m-desc">三级账号<br>指定模块操作权限</div>
+        <span class="m-tag">三级</span>
+      </div>
+      <div class="module">
+        <span class="m-icon">🏛️</span>
+        <div class="m-name">政府监管</div>
+        <div class="m-desc">农产品溯源监管<br>环境数据审核</div>
+        <span class="m-tag">监管</span>
+      </div>
+      <div class="module">
+        <span class="m-icon">🏢</span>
+        <div class="m-name">企业客户</div>
+        <div class="m-desc">SaaS租户<br>多农场集团管理</div>
+        <span class="m-tag">租户</span>
+      </div>
+      <div class="module">
+        <span class="m-icon">🔬</span>
+        <div class="m-name">科研机构</div>
+        <div class="m-desc">农业数据研究<br>模型训练</div>
+        <span class="m-tag">科研</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow-row"><span class="arrow-label">访问 / 操作</span></div>
+
+  <!-- ===== Layer 2: 展示层 ===== -->
+  <div class="layer layer-pres">
+    <div class="layer-label">
+      <span class="icon">🖥️</span>
+      <span class="name">展示层</span>
+    </div>
+    <div class="layer-content">
+      <div class="module highlight">
+        <span class="m-icon">💻</span>
+        <div class="m-name">PC管理台</div>
+        <div class="m-desc">20个功能模块<br>全量管理操作</div>
+        <span class="m-tag">Web SPA</span>
+      </div>
+      <div class="module">
+        <span class="m-icon">📱</span>
+        <div class="m-name">移动端H5</div>
+        <div class="m-desc">实时监测 / 远程控制<br>告警通知 / 扫码溯源</div>
+        <span class="m-tag">H5</span>
+      </div>
+      <div class="module highlight">
+        <span class="m-icon">📺</span>
+        <div class="m-name">大屏可视化</div>
+        <div class="m-desc">3列9面板布局<br>自动轮显 / 实时数据</div>
+        <span class="m-tag">LED大屏</span>
+      </div>
+      <div class="module">
+        <span class="m-icon">📊</span>
+        <div class="m-name">数据看板</div>
+        <div class="m-desc">图表 / 表格切换<br>导出 Excel / PDF</div>
+        <span class="m-tag">报表</span>
+      </div>
+      <div class="module">
+        <span class="m-icon">🔔</span>
+        <div class="m-name">告警通知</div>
+        <div class="m-desc">邮件报警 / 短信报警<br>站内消息 / 微信推送</div>
+        <span class="m-tag">多渠道</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow-row"><span class="arrow-label">数据展示 / 指令下发</span></div>
+
+  <!-- ===== Layer 3: 应用层 ===== -->
+  <div class="layer layer-app">
+    <div class="layer-label">
+      <span class="icon">🌐</span>
+      <span class="name">应用层</span>
+    </div>
+    <div class="layer-content">
+      <div class="module">
+        <span class="m-icon">🌤️</span>
+        <div class="m-name">气象监测</div>
+        <div class="m-desc">温度/湿度/风速/雨量<br>CO₂/PM2.5 等15+参数</div>
+        <span class="m-tag">15+参数</span>
+      </div>
+      <div class="module">
+        <span class="m-icon">🌱</span>
+        <div class="m-name">土壤墒情</div>
+        <div class="m-desc">土温/水分/PH/张力<br>电导率/分层监测</div>
+        <span class="m-tag">6参数</span>
+      </div>
+      <div class="module">
+        <span class="m-icon">💧</span>
+        <div class="m-name">水质监测</div>
+        <div class="m-desc">pH/溶解氧/氨氮<br>浊度/余氯</div>
+        <span class="m-tag">6指标</span>
+      </div>
+      <div class="module">
+        <span class="m-icon">🎮</span>
+        <div class="m-name">智能控制</div>
+        <div class="m-desc">开关量/正反转/百分比<br>远程/定时/自动策略</div>
+        <span class="m-tag">3模式</span>
+      </div>
+      <div class="module">
+        <span class="m-icon">🚿</span>
+        <div class="m-name">智能灌溉</div>
+        <div class="m-desc">阀门控制/水肥一体<br>节水节肥/高效多产</div>
+        <span class="m-tag">节水</span>
+      </div>
+      <div class="module">
+        <span class="m-icon">📋</span>
+        <div class="m-name">生产管理</div>
+        <div class="m-desc">人员/设备/任务/质检<br>仓储/维护 统计</div>
+        <span class="m-tag">9维度</span>
+      </div>
+      <div class="module">
+        <span class="m-icon">🔗</span>
+        <div class="m-name">产品溯源</div>
+        <div class="m-desc">一物一码/全流程追溯<br>种植→加工→销售</div>
+        <span class="m-tag">一物一码</span>
+      </div>
+      <div class="module">
+        <span class="m-icon">📹</span>
+        <div class="m-name">视频监控</div>
+        <div class="m-desc">苗情/灾情/通用视频<br>24h实时/PTZ云台</div>
+        <span class="m-tag">PTZ</span>
+      </div>
+      <div class="module">
+        <span class="m-icon">🦗</span>
+        <div class="m-name">虫情监测</div>
+        <div class="m-desc">自动采集/AI识别<br>趋势分析/种类统计</div>
+        <span class="m-tag">AI</span>
+      </div>
+      <div class="module">
+        <span class="m-icon">🔬</span>
+        <div class="m-name">孢子监测</div>
+        <div class="m-desc">全天候采集/种类识别<br>病害预警/风险等级</div>
+        <span class="m-tag">全天候</span>
+      </div>
+      <div class="module">
+        <span class="m-icon">⚡</span>
+        <div class="m-name">能耗管理</div>
+        <div class="m-desc">电表采集/能耗报表<br>碳排放核算/负荷调度</div>
+        <span class="m-tag">SaaS</span>
+      </div>
+      <div class="module">
+        <span class="m-icon">🗺️</span>
+        <div class="m-name">区域管理</div>
+        <div class="m-desc">园区/大棚/鱼塘/户外<br>设备点位/区域规划</div>
+        <span class="m-tag">GIS</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow-row"><span class="arrow-label">业务逻辑 / 数据处理</span></div>
+
+  <!-- ===== Layer 4: 平台层 ===== -->
+  <div class="layer layer-plat">
+    <div class="layer-label">
+      <span class="icon">⚙️</span>
+      <span class="name">平台层</span>
+    </div>
+    <div class="layer-content">
+      <div class="module">
+        <span class="m-icon">📟</span>
+        <div class="m-name">设备管理</div>
+        <div class="m-desc">注册/分组/OTA升级<br>在线状态/生命周期</div>
+        <span class="m-tag">IoT</span>
+      </div>
+      <div class="module">
+        <span class="m-icon">🔐</span>
+        <div class="m-name">设备认证</div>
+        <div class="m-desc">EMQX HTTP Auth<br>per-device身份验证</div>
+        <span class="m-tag">MQTT Auth</span>
+      </div>
+      <div class="module">
+        <span class="m-icon">📦</span>
+        <div class="m-name">OTA升级</div>
+        <div class="m-desc">固件管理/任务编排<br>进度追踪/版本控制</div>
+        <span class="m-tag">Firmware</span>
+      </div>
+      <div class="module highlight">
+        <span class="m-icon">📐</span>
+        <div class="m-name">规则引擎</div>
+        <div class="m-desc">Drools动态规则<br>告警/联动/热加载</div>
+        <span class="m-tag">Drools</span>
+      </div>
+      <div class="module highlight">
+        <span class="m-icon">🧠</span>
+        <div class="m-name">AI引擎</div>
+        <div class="m-desc">虫情AI识别/病害预测<br>产量预测/决策辅助</div>
+        <span class="m-tag">AI</span>
+      </div>
+      <div class="module">
+        <span class="m-icon">📨</span>
+        <div class="m-name">消息队列</div>
+        <div class="m-desc">Kafka高吞吐解耦<br>异步数据处理</div>
+        <span class="m-tag">Kafka</span>
+      </div>
+      <div class="module">
+        <span class="m-icon">🏢</span>
+        <div class="m-name">多租户</div>
+        <div class="m-desc">tenant_id隔离<br>MyBatis拦截器</div>
+        <span class="m-tag">SaaS</span>
+      </div>
+      <div class="module">
+        <span class="m-icon">🚦</span>
+        <div class="m-name">限流防护</div>
+        <div class="m-desc">Redis+AOP限流<br>CORS/XSS过滤</div>
+        <span class="m-tag">安全</span>
+      </div>
+      <div class="module">
+        <span class="m-icon">📊</span>
+        <div class="m-name">监控运维</div>
+        <div class="m-desc">Actuator+Prometheus<br>健康检查/指标暴露</div>
+        <span class="m-tag">监控</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow-row"><span class="arrow-label">数据存储 / 消息流转</span></div>
+
+  <!-- ===== Layer 5: 数据层 ===== -->
+  <div class="layer layer-data">
+    <div class="layer-label">
+      <span class="icon">💾</span>
+      <span class="name">数据层</span>
+    </div>
+    <div class="layer-content">
+      <div class="module">
+        <span class="m-icon">🗄️</span>
+        <div class="m-name">MySQL</div>
+        <div class="m-desc">业务数据/设备/用户<br>读写分离</div>
+        <span class="m-tag">关系型</span>
+      </div>
+      <div class="module">
+        <span class="m-icon">📈</span>
+        <div class="m-name">InfluxDB</div>
+        <div class="m-desc">时序数据存储<br>传感器读数/历史</div>
+        <span class="m-tag">时序</span>
+      </div>
+      <div class="module">
+        <span class="m-icon">⚡</span>
+        <div class="m-name">Redis</div>
+        <div class="m-desc">实时缓存/会话<br>限流计数/最新数据</div>
+        <span class="m-tag">缓存</span>
+      </div>
+      <div class="module">
+        <span class="m-icon">🗂️</span>
+        <div class="m-name">对象存储</div>
+        <div class="m-desc">图片/视频/固件<br>苗情照片/溯源图片</div>
+        <span class="m-tag">MinIO</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow-row"><span class="arrow-label">网络传输 / 协议接入</span></div>
+
+  <!-- ===== Layer 6: 网络层 ===== -->
+  <div class="layer layer-net">
+    <div class="layer-label">
+      <span class="icon">📡</span>
+      <span class="name">网络层</span>
+    </div>
+    <div class="layer-content">
+      <div class="module">
+        <span class="m-icon">📶</span>
+        <div class="m-name">LoRa</div>
+        <div class="m-desc">远距离低功耗<br>大棚内传感器组网</div>
+        <span class="m-tag">LoRaWAN</span>
+      </div>
+      <div class="module">
+        <span class="m-icon">📶</span>
+        <div class="m-name">4G/5G</div>
+        <div class="m-desc">视频回传/大带宽数据<br>远程控制通道</div>
+        <span class="m-tag">蜂窝</span>
+      </div>
+      <div class="module">
+        <span class="m-icon">📶</span>
+        <div class="m-name">NB-IoT</div>
+        <div class="m-desc">低功耗广域<br>土壤/水质传感器</div>
+        <span class="m-tag">窄带</span>
+      </div>
+      <div class="module">
+        <span class="m-icon">📶</span>
+        <div class="m-name">WiFi</div>
+        <div class="m-desc">大棚内/园区覆盖<br>摄像头/控制器</div>
+        <span class="m-tag">局域</span>
+      </div>
+      <div class="module">
+        <span class="m-icon">🔌</span>
+        <div class="m-name">有线网络</span>
+        <div class="m-desc">以太网/RS485<br>Modbus网关接入</div>
+        <span class="m-tag">有线</span>
+      </div>
+      <div class="module">
+        <span class="m-icon">🔄</span>
+        <div class="m-name">MQTT网关</div>
+        <div class="m-desc">协议转换/边缘计算<br>设备接入网关</div>
+        <span class="m-tag">边缘</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow-row"><span class="arrow-label">数据采集 / 设备接入</span></div>
+
+  <!-- ===== Layer 7: 感知层 ===== -->
+  <div class="layer layer-perc">
+    <div class="layer-label">
+      <span class="icon">🌡️</span>
+      <span class="name">感知层</span>
+    </div>
+    <div class="layer-content">
+      <div class="module">
+        <span class="m-icon">🌡️</span>
+        <div class="m-name">气象站</div>
+        <div class="m-desc">温湿度/风速风向/雨量<br>气压/辐射/CO₂</div>
+        <span class="m-tag">15+传感器</span>
+      </div>
+      <div class="module">
+        <span class="m-icon">🌱</span>
+        <div class="m-name">土壤传感器</div>
+        <div class="m-desc">土温/水分/PH<br>张力/电导率 探针</div>
+        <span class="m-tag">多层探针</span>
+      </div>
+      <div class="module">
+        <span class="m-icon">💧</span>
+        <div class="m-name">水质传感器</div>
+        <div class="m-desc">pH/溶解氧/氨氮<br>浊度/余氯 探头</div>
+        <span class="m-tag">水产</span>
+      </div>
+      <div class="module">
+        <span class="m-icon">🦗</span>
+        <div class="m-name">虫情测报仪</div>
+        <div class="m-desc">自动诱虫/拍照<br>AI识别计数</div>
+        <span class="m-tag">AI识别</span>
+      </div>
+      <div class="module">
+        <span class="m-icon">🔬</span>
+        <div class="m-name">孢子捕捉仪</div>
+        <div class="m-desc">全天候孢子采集<br>显微成像/分类</div>
+        <span class="m-tag">全天候</span>
+      </div>
+      <div class="module">
+        <span class="m-icon">📷</span>
+        <div class="m-name">高清摄像头</div>
+        <div class="m-desc">苗情/灾情/安防<br>PTZ云台/夜视</div>
+        <span class="m-tag">PTZ</span>
+      </div>
+      <div class="module">
+        <span class="m-icon">🚿</span>
+        <div class="m-name">灌溉设备</div>
+        <div class="m-desc">电磁阀/水泵/喷头<br>水肥一体机</div>
+        <span class="m-tag">执行器</span>
+      </div>
+      <div class="module">
+        <span class="m-icon">⚡</span>
+        <div class="m-name">电表/水表</div>
+        <div class="m-desc">Modbus电表/水表/燃气表<br>CT/PT 变比</div>
+        <span class="m-tag">能源</span>
+      </div>
+      <div class="module">
+        <span class="m-icon">💡</span>
+        <div class="m-name">控制器</div>
+        <div class="m-desc">顶开窗/遮阳网/风机<br>补光灯/采暖设备</div>
+        <span class="m-tag">执行器</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Legend ===== -->
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:linear-gradient(135deg,#3a5a1a,#52c41a)"></div>感知层 - IoT设备/传感器</div>
+    <div class="legend-item"><div class="legend-dot" style="background:linear-gradient(135deg,#1a3a5a,#409eff)"></div>网络层 - 通信协议/网关</div>
+    <div class="legend-item"><div class="legend-dot" style="background:linear-gradient(135deg,#5a1a4a,#ff4d9f)"></div>数据层 - 存储引擎</div>
+    <div class="legend-item"><div class="legend-dot" style="background:linear-gradient(135deg,#1a5a3a,#00ff88)"></div>平台层 - 核心服务引擎</div>
+    <div class="legend-item"><div class="legend-dot" style="background:linear-gradient(135deg,#7a4a1a,#ff9500)"></div>应用层 - 业务功能模块</div>
+    <div class="legend-item"><div class="legend-dot" style="background:linear-gradient(135deg,#4a1a7a,#a855f7)"></div>展示层 - 终端展示</div>
+    <div class="legend-item"><div class="legend-dot" style="background:linear-gradient(135deg,#1a4a7a,#409eff)"></div>用户层 - 角色权限</div>
+  </div>
+
+  <!-- ===== Stats ===== -->
+  <div class="footer-stats">
+    <div class="stat"><div class="num">7</div><div class="label">架构层级</div></div>
+    <div class="stat"><div class="num">18+</div><div class="label">业务模块</div></div>
+    <div class="stat"><div class="num">40+</div><div class="label">功能界面</div></div>
+    <div class="stat"><div class="num">15+</div><div class="label">传感器类型</div></div>
+    <div class="stat"><div class="num">5</div><div class="label">通信协议</div></div>
+    <div class="stat"><div class="num">4</div><div class="label">告警类型</div></div>
+    <div class="stat"><div class="num">3</div><div class="label">控制模式</div></div>
+  </div>
+
+</div>
+</body>
+</html>
