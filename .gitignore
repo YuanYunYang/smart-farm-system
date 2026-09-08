@@ -52,3 +52,4 @@ application-dev.yml
 ### 临时文件 ###
 *.tmp
 *.bak
+.github/
