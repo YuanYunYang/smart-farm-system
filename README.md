@@ -44,7 +44,7 @@
 
 <p align="center">
   <a href="frontend/index.html">
-    <img src="frontend/index.html" alt="PC 管理台" width="90%"/>
+    <img src="docs/images/dashboard-pc.jpg" alt="PC 管理台" width="90%"/>
   </a>
 </p>
 
@@ -65,7 +65,7 @@
 
 <p align="center">
   <a href="frontend/bigscreen.html">
-    <img src="frontend/bigscreen.html" alt="大屏可视化" width="90%"/>
+    <img src="docs/images/dashboard-bigscreen.jpg" alt="大屏可视化" width="90%"/>
   </a>
 </p>
 
@@ -75,7 +75,7 @@
 
 <p align="center">
   <a href="frontend/mobile.html">
-    <img src="frontend/mobile.html" alt="移动端 H5" width="25%"/>
+    <img src="docs/images/dashboard-mobile.jpg" alt="移动端 H5" width="25%"/>
   </a>
 </p>
 
@@ -85,7 +85,7 @@
 
 <p align="center">
   <a href="frontend/panorama.html">
-    <img src="frontend/panorama.html" alt="业务全景图" width="90%"/>
+    <img src="frontend/smart-farm-pano.jpg" alt="业务全景图" width="90%"/>
   </a>
 </p>
 
@@ -95,7 +95,7 @@
 
 <p align="center">
   <a href="frontend/system-architecture.html">
-    <img src="frontend/system-architecture.html" alt="系统联动架构图" width="90%"/>
+    <img src="frontend/smart-farm-iso.jpg" alt="系统联动架构图" width="90%"/>
   </a>
 </p>
 
