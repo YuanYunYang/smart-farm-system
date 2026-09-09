@@ -20,7 +20,7 @@ import java.util.List;
  * @author Smart Farm Team
  */
 @RestController
-@RequestMapping("/api/rule")
+@RequestMapping("/v1/api/rule")
 @RequiredArgsConstructor
 @Tag(name = "告警规则引擎", description = "Drools 规则 CRUD、测试与重载")
 public class RuleController {

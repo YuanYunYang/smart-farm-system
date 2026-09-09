@@ -18,7 +18,7 @@ import java.util.Map;
  * @author Smart Farm Team
  */
 @RestController
-@RequestMapping("/api/dashboard")
+@RequestMapping("/v1/api/dashboard")
 @RequiredArgsConstructor
 @Tag(name = "数据看板", description = "看板聚合数据与趋势查询")
 public class DashboardController {

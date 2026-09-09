@@ -20,7 +20,7 @@ import java.util.Map;
  * @author Smart Farm Team
  */
 @RestController
-@RequestMapping("/api/irrigation")
+@RequestMapping("/v1/api/irrigation")
 @RequiredArgsConstructor
 @Tag(name = "灌溉控制", description = "手动灌溉、灌溉规则管理与日志查询")
 public class IrrigationController {

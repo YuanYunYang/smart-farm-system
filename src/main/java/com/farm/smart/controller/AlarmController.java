@@ -17,7 +17,7 @@ import java.util.List;
  * @author Smart Farm Team
  */
 @RestController
-@RequestMapping("/api/alarm")
+@RequestMapping("/v1/api/alarm")
 @RequiredArgsConstructor
 @Tag(name = "告警管理", description = "告警查询与处理")
 public class AlarmController {

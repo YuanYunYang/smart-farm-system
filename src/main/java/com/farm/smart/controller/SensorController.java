@@ -21,7 +21,7 @@ import java.util.Map;
  * @author Smart Farm Team
  */
 @RestController
-@RequestMapping("/api/sensor")
+@RequestMapping("/v1/api/sensor")
 @RequiredArgsConstructor
 @Tag(name = "传感器数据", description = "传感器设备列表与历史趋势数据查询")
 public class SensorController {

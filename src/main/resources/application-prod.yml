@@ -1,0 +1,61 @@
+# ============================================================
+# 智能农场监测系统 - 生产环境配置覆盖
+# ============================================================
+spring:
+  # 读写分离动态数据源
+  datasource:
+    dynamic:
+      datasource:
+        master:
+          url: jdbc:mysql://${DB_HOST}:3306/smart_farm?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&rewriteBatchedStatements=true
+          username: ${DB_USER}
+          password: ${DB_PASSWORD}
+          driver-class-name: com.mysql.cj.jdbc.Driver
+        slave:
+          url: jdbc:mysql://${DB_SLAVE_HOST}:3307/smart_farm?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+          username: ${DB_USER}
+          password: ${DB_PASSWORD}
+          driver-class-name: com.mysql.cj.jdbc.Driver
+  # Redis
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD}
+  # Kafka
+  kafka:
+    bootstrap-servers: ${KAFKA_SERVERS}
+
+# MyBatis-Plus - 生产环境关闭 SQL 日志
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.nologging.NoLoggingImpl
+
+# MQTT
+mqtt:
+  broker-url: tcp://${MQTT_HOST}:${MQTT_PORT:1883}
+  username: ${MQTT_USER:}
+  password: ${MQTT_PASSWORD:}
+
+# InfluxDB
+influxdb:
+  url: http://${INFLUX_HOST}:8086
+  token: ${INFLUX_TOKEN}
+
+# AI
+ai:
+  disease:
+    base-url: ${AI_SERVICE_URL:http://localhost:8501}
+    enabled: ${AI_ENABLED:false}
+
+# JWT
+jwt:
+  secret: ${JWT_SECRET}
+
+# 日志 - 生产环境使用 info 级别
+logging:
+  level:
+    com.farm.smart: info
+    org.eclipse.paho: warn
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"

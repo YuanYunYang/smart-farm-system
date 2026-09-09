@@ -25,7 +25,7 @@ import java.util.Map;
  * @author Smart Farm Team
  */
 @RestController
-@RequestMapping("/api/ota")
+@RequestMapping("/v1/api/ota")
 @RequiredArgsConstructor
 @Tag(name = "OTA固件升级", description = "固件管理与设备升级任务")
 public class OtaController {

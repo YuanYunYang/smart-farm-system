@@ -17,7 +17,7 @@ import java.util.List;
  * @author Smart Farm Team
  */
 @RestController
-@RequestMapping("/api/farm")
+@RequestMapping("/v1/api/farm")
 @RequiredArgsConstructor
 @Tag(name = "农场管理", description = "农场和地块的CRUD接口")
 public class FarmController {

@@ -21,7 +21,7 @@ import java.util.List;
  * @author Smart Farm Team
  */
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping("/v1/api/user")
 @RequiredArgsConstructor
 @Tag(name = "用户管理", description = "用户增删改查与启停 (RBAC 分级)")
 public class UserController {

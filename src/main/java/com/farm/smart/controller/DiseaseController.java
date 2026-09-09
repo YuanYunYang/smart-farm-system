@@ -19,7 +19,7 @@ import java.util.List;
  * @author Smart Farm Team
  */
 @RestController
-@RequestMapping("/api/disease")
+@RequestMapping("/v1/api/disease")
 @RequiredArgsConstructor
 @Tag(name = "病虫害识别", description = "AI病虫害识别与历史记录")
 public class DiseaseController {

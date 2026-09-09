@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
  * @author Smart Farm Team
  */
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/v1/auth")
 @RequiredArgsConstructor
 @Tag(name = "认证管理", description = "用户登录与当前用户信息")
 public class AuthController {
